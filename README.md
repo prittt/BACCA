@@ -1,4 +1,4 @@
-# THeBE: The THinning evaluation BEnchmark
+# RCCB: Raster Chain Code Benchmark
 
 <p align="justify">Please include the following reference when citing the THeBE project/dataset:</p>
 
