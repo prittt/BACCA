@@ -1,4 +1,6 @@
-# RCCB: Raster Chain Code Benchmark
+[](doc/bacca.png)
+
+# BACCA: Benchmark Another Chain Code Algorithm
 
 <p align="justify">Please include the following reference when citing the THeBE project/dataset:</p>
 
