@@ -26,14 +26,14 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_REGISTER_H_
-#define THEBE_REGISTER_H_
+#ifndef BACCA_REGISTER_H_
+#define BACCA_REGISTER_H_
 
-#define REGISTER_THINNING(algorithm)                                           \
+#define REGISTER_CHAINCODEALG(algorithm)                                           \
 class register_##algorithm {                                                   \
   public:                                                                      \
     register_##algorithm() {                                                   \
-        ThinningMapSingleton::GetInstance().data_[#algorithm] = new algorithm; \
+        ChainCodeAlgMapSingleton::GetInstance().data_[#algorithm] = new algorithm; \
     }                                                                          \
 } reg_##algorithm;
 
@@ -48,4 +48,4 @@ class register_##algorithm {                                                   \
 //  }                                                                                                     \
 //}  register_ ## algorithm ## _ ## solver;
 
-#endif // !THEBE_REGISTER_H_
+#endif // !BACCA_REGISTER_H_

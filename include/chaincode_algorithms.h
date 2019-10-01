@@ -26,47 +26,64 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_THINNING_CHENHSU_1897_H_
-#define THEBE_THINNING_CHENHSU_1897_H_
+#ifndef BACCA_CHAIN_CODE_ALGORITHMS_H_
+#define BACCA_CHAIN_CODE_ALGORITHMS_H_
 
+#include <iostream>
+#include <map>
+#include <string>
 #include <vector>
 
 #include <opencv2/core.hpp>
 
-#include "thinning_algorithms.h"
-#include "thinning_iteration.h"
-#include "register.h"
+#include "performance_evaluator.h"
+#include "chain_code.h"
 
-class ChenHsu : public Thinning {
+class ChainCodeAlg {
 public:
-    inline static bool should_remove_0(uint16_t block);
-    inline static bool should_remove_1(uint16_t block);
+    static cv::Mat1b img_;
 
-    THINNING_ITERATION(0);
-    THINNING_ITERATION(1);
-    PERFORM_THINNING;
+    ChainCode chain_code_;
+
+    PerformanceEvaluator perf_;
+
+    ChainCodeAlg() {}
+    virtual ~ChainCodeAlg() = default;
+
+    virtual void PerformChainCode() { throw std::runtime_error("'PerformThinning()' not implemented"); }
+    virtual void PerformChainCodeWithSteps() { throw std::runtime_error("'PerformThinningWithSteps()' not implemented"); }
+    virtual void PerformChainCodeMem(std::vector<uint64_t>& accesses) { throw std::runtime_error("'PerformThinningMem(...)' not implemented"); }
+
+    virtual void FreeChainCodeData() { chain_code_.Clean(); }
+
 };
 
-class ChenHsuLUT : public Thinning {
+class ChainCodeAlgMapSingleton {
 public:
-    inline static bool should_remove_0(uint16_t block);
-    inline static bool should_remove_1(uint16_t block);
+    std::map<std::string, ChainCodeAlg*> data_;
 
-    THINNING_ITERATION(0);
-    THINNING_ITERATION(1);
-    PERFORM_THINNING;
+    static ChainCodeAlgMapSingleton& GetInstance();
+    static ChainCodeAlg* GetChainCodeAlg(const std::string& s);
+    static bool Exists(const std::string& s);
+    ChainCodeAlgMapSingleton(ChainCodeAlgMapSingleton const&) = delete;
+    void operator=(ChainCodeAlgMapSingleton const&) = delete;
+
+private:
+    ChainCodeAlgMapSingleton() {}
+    ~ChainCodeAlgMapSingleton()
+    {
+        for (std::map<std::string, ChainCodeAlg*>::iterator it = data_.begin(); it != data_.end(); ++it)
+            delete it->second;
+    }
 };
 
-class ChenHsuTree : public Thinning {
-public:
-    inline static bool thinning_iteration(cv::Mat1b& img, int iter);
-    PERFORM_THINNING_DT
+enum StepType {
+    ALLOC_DEALLOC = 0,
+    THINNING = 1,
+
+    ST_SIZE = 2,
 };
 
-class ChenHsuDrag : public Thinning {
-public:
-    inline static bool thinning_iteration(cv::Mat1b& img, int iter);
-    PERFORM_THINNING_DT
-};
-#endif // !THEBE_THINNING_CHENHSU_1897_H_
+std::string Step(StepType n_step);
 
+#endif // BACCA_CHAIN_CODE_ALGORITHMS_

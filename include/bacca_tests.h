@@ -26,8 +26,8 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_THEBE_TESTS_H_
-#define THEBE_THEBE_TESTS_H_
+#ifndef BACCA_BACCA_TESTS_H_
+#define BACCA_BACCA_TESTS_H_
 
 #include <map>
 #include <utility>
@@ -36,7 +36,7 @@
 
 #include "config_data.h"
 #include "file_manager.h"
-#include "thinning_algorithms.h"
+#include "chaincode_algorithms.h"
 #include "progress_bar.h"
 
 // To compare lengths of OpenCV String
@@ -48,21 +48,21 @@ class ThebeTests {
 public:
 	ThebeTests(const ConfigData& cfg) : cfg_(cfg) {}
 
-    void CheckPerformThinning()
+    void CheckPerformChainCode()
     {
-        std::string title = "Checking Correctness of 'PerformThinning()'";
-        CheckAlgorithms(title, cfg_.thin_average_algorithms, &Thinning::PerformThinning);
+        std::string title = "Checking Correctness of 'PerformChainCode()'";
+        CheckAlgorithms(title, cfg_.thin_average_algorithms, &ChainCodeAlg::PerformChainCode);
     }
-	void CheckPerformThinningWithSteps()
+	void CheckPerformChainCodeWithSteps()
     {
-        std::string title = "Checking Correctness of 'PerformThinningWithSteps()' (8-Connectivity)";
-        CheckAlgorithms(title, cfg_.thin_average_ws_algorithms, &Thinning::PerformThinningWithSteps);
+        std::string title = "Checking Correctness of 'PerformChainCodeWithSteps()' (8-Connectivity)";
+        CheckAlgorithms(title, cfg_.thin_average_ws_algorithms, &ChainCodeAlg::PerformChainCodeWithSteps);
     }
-    void CheckPerformThinningMem()
+    void CheckPerformChainCodeMem()
     {
-        std::string title = "Checking Correctness of 'PerformThinningMem()' (8-Connectivity)";
+        std::string title = "Checking Correctness of 'PerformChainCodeMem()' (8-Connectivity)";
         std::vector<uint64_t> unused;
-        CheckAlgorithms(title, cfg_.thin_mem_algorithms, &Thinning::PerformThinningMem, unused);
+        CheckAlgorithms(title, cfg_.thin_mem_algorithms, &ChainCodeAlg::PerformChainCodeMem, unused);
     }
 
     void AverageTest();
@@ -118,7 +118,7 @@ private:
                 path filename_path = dataset_path / path(filename);
 
                 // Load image
-                if (!GetBinaryImage(filename_path, Thinning::img_)) {
+                if (!GetBinaryImage(filename_path, ChainCodeAlg::img_)) {
                     ob.Cmessage("Unable to open '" + filename + "'");
                     continue;
                 }
@@ -129,22 +129,22 @@ private:
                     string check_algo_name = thin_algorithms[alg].check_name;
 
                     // SAUF with Union-Find is the reference: labels are already "normalized"
-                    Thinning *ref = ThinningMapSingleton::GetThinning(check_algo_name);
-                    ref->PerformThinning();
-                    cv::Mat1b skeleton_img_correct = ref->img_out_.clone();
-                    ref->FreeThinningData();
+                    ChainCodeAlg *ref = ChainCodeAlgMapSingleton::GetChainCodeAlg(check_algo_name);
+                    ref->PerformChainCode();
+                    ChainCode chain_code_correct = ref->chain_code_;
+                    ref->FreeChainCodeData();
 
-                    Thinning *algorithm = ThinningMapSingleton::GetThinning(algo_name);
+                    ChainCodeAlg *algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(algo_name);
 
                     // Perform labeling on current algorithm if it has no previously failed
                     if (stats[j]) {
-                        cv::Mat1b & skeleton_img_to_control = algorithm->img_out_;
-
                         (algorithm->*func)(std::forward<Args>(args)...);
-                        
-                        const auto diff = CompareMat(skeleton_img_correct, skeleton_img_to_control);
 
-                        algorithm->FreeThinningData(); // Free algorithm's data
+                        ChainCode chain_code_to_control = algorithm->chain_code_;
+                        
+                        bool diff = (chain_code_correct == chain_code_to_control);
+
+                        algorithm->FreeChainCodeData(); // Free algorithm's data
 
                         if (!diff) {
                             stats[j] = false;
@@ -182,4 +182,4 @@ private:
     }
 };
 
-#endif // !THEBE_THEBE_TESTS_H_
+#endif // !BACCA_BACCA_TESTS_H_

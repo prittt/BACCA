@@ -26,8 +26,8 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_SYSTEM_INFO_H_
-#define THEBE_SYSTEM_INFO_H_
+#ifndef BACCA_SYSTEM_INFO_H_
+#define BACCA_SYSTEM_INFO_H_
 
 #include <iostream>
 #include <string>
@@ -44,17 +44,17 @@
 #include <WINDOWS.h>
 #include <lm.h>
 #pragma comment(lib, "netapi32.lib")
-#define THEBE_WINDOWS
+#define BACCA_WINDOWS
 #elif  __gnu_linux__ || __linux__
-#define THEBE_LINUX
+#define BACCA_LINUX
 #include <sys/utsname.h>
 #elif  __unix || __unix__
-#define THEBE_UNIX
+#define BACCA_UNIX
 #include <sys/utsname.h>
 #elif __APPLE__ || __MACH__ || macintosh || Macintosh || (__APPLE__ && __MACH__)
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#define THEBE_APPLE
+#define BACCA_APPLE
 #endif
 
 extern struct ConfigData cfg;
@@ -104,4 +104,4 @@ private:
     void SetCompiler();
 };
 
-#endif // !THEBE_SYSTEM_INFO_H_
+#endif // !BACCA_SYSTEM_INFO_H_

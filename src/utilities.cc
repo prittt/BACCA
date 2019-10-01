@@ -46,7 +46,7 @@ using namespace cv;
 using namespace filesystem;
 using namespace std;
 
-#ifdef THEBE_APPLE
+#ifdef BACCA_APPLE
 const string kTerminal = "postscript";
 const string kTerminalExtension = ".ps";
 #else
@@ -76,13 +76,13 @@ string GetDatetime()
     for (auto& c : buffer)
         c = '\0';
 
-#if defined(THEBE_WINDOWS) && defined(_MSC_VER)
+#if defined(BACCA_WINDOWS) && defined(_MSC_VER)
 
     struct tm timeinfo;
     localtime_s(&timeinfo, &rawtime);
     strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", &timeinfo);
 
-#elif defined(THEBE_WINDOWS) || defined(THEBE_LINUX) || defined(THEBE_UNIX) || defined(THEBE_APPLE)
+#elif defined(BACCA_WINDOWS) || defined(BACCA_LINUX) || defined(BACCA_UNIX) || defined(BACCA_APPLE)
 
     struct tm * timeinfo;
     timeinfo = localtime(&rawtime);
@@ -132,7 +132,7 @@ bool CompareMat(const Mat1i& mat_a, const Mat1i& mat_b)
 
 void HideConsoleCursor()
 {
-#ifdef THEBE_WINDOWS
+#ifdef BACCA_WINDOWS
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
     CONSOLE_CURSOR_INFO cursor_info;
@@ -141,7 +141,7 @@ void HideConsoleCursor()
     cursor_info.bVisible = false; // set the cursor visibility
     SetConsoleCursorInfo(out, &cursor_info);
 
-#elif defined(THEBE_LINUX) || defined(THEBE_UNIX) || defined(THEBE_APPLE)
+#elif defined(BACCA_LINUX) || defined(BACCA_UNIX) || defined(BACCA_APPLE)
     int unused; // To avoid "return unused" and "variable unused" warnings 
     unused = system("setterm -cursor off");
 #endif

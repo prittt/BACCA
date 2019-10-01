@@ -26,7 +26,7 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "thebe_tests.h"
+#include "bacca_tests.h"
 
 #include <algorithm>
 #include <fstream>
@@ -38,7 +38,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 
-#include "thinning_algorithms.h"
+#include "chaincode_algorithms.h"
 #include "latex_generator.h"
 #include "memory_tester.h"
 #include "utilities.h"
@@ -310,7 +310,7 @@ void ThebeTests::AverageTest()
                 path filename_path = dataset_path / path(filename);
 
                 // Read and load image
-                if (!GetBinaryImage(filename_path, Thinning::img_)) {
+                if (!GetBinaryImage(filename_path, ChainCodeAlg::img_)) {
                     ob.Cwarning("Unable to open '" + filename + "', skipped");
                     continue;
                 }
@@ -319,18 +319,18 @@ void ThebeTests::AverageTest()
 
                 // For all the Algorithms in the array
                 for (const auto& algo_name : shuffled_thin_average_algorithms) {
-                    Thinning *algorithm = ThinningMapSingleton::GetThinning(algo_name);
+                    ChainCodeAlg *algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(algo_name);
                     unsigned i = algo_pos[algo_name];
 
                     try {
                         // Perform current algorithm on current image and save result.
                         algorithm->perf_.start();
-                        algorithm->PerformThinning();
+                        algorithm->PerformChainCode();
                         algorithm->perf_.stop();
 
                     }
                     catch (const exception& e) {
-                        algorithm->FreeThinningData();
+                        algorithm->FreeChainCodeData();
                         ob.Cerror("Something wrong with " + algo_name + ": " + e.what()); // You should check your algorithms' implementation before performing THeBE tests  
                     }
 
@@ -340,12 +340,12 @@ void ThebeTests::AverageTest()
                         min_res(file, i) = algorithm->perf_.last();
                     }
 
-					if (cfg_.output_images) {
-						String output_image = (output_images_path / path(filename + "_" + algo_name + ".png")).string();
-						imwrite(output_image, algorithm->img_out_);
-					}
+					//if (cfg_.output_images) {
+					//	String output_image = (output_images_path / path(filename + "_" + algo_name + ".png")).string();
+					//	imwrite(output_image, algorithm->img_out_);
+					//}
 
-                    algorithm->FreeThinningData();
+                    algorithm->FreeChainCodeData();
                 } // END ALGORITHMS FOR
             } // END FILES FOR.
             ob.StopRepeatedBox(false);
@@ -565,7 +565,7 @@ void ThebeTests::AverageTestWithSteps()
                 path filename_path = dataset_path / path(filename);
 
                 // Read and load image
-                if (!GetBinaryImage(filename_path, Thinning::img_)) {
+                if (!GetBinaryImage(filename_path, ChainCodeAlg::img_)) {
                     ob.Cwarning("Unable to open '" + filename + "'");
                     continue;
                 }
@@ -574,15 +574,15 @@ void ThebeTests::AverageTestWithSteps()
 
                 // For all the Algorithms in the array
                 for (const auto& algo_name : shuffled_thin_average_ws_algorithms) {
-                    Thinning *algorithm = ThinningMapSingleton::GetThinning(algo_name);
+                    ChainCodeAlg *algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(algo_name);
                     unsigned i = algo_pos[algo_name];
 
                     try {
                         // Perform current algorithm on current image and save result.
-                        algorithm->PerformThinningWithSteps();
+                        algorithm->PerformChainCodeWithSteps();
                     }
                     catch (const exception& e) {
-                        algorithm->FreeThinningData();
+                        algorithm->FreeChainCodeData();
                         ob.Cerror("Something wrong with " + algo_name + ": " + e.what()); // You should check your algorithms' implementation before performing THeBE tests  
                     }
 
@@ -598,7 +598,7 @@ void ThebeTests::AverageTestWithSteps()
                             }
                         }
                     }
-                    algorithm->FreeThinningData();
+                    algorithm->FreeChainCodeData();
                 } // END ALGORITHMS FOR
             } // END FILES FOR.
             ob.StopRepeatedBox(false);
@@ -816,7 +816,7 @@ void ThebeTests::MemoryTest()
             path filename_path = dataset_path / path(filename);
 
             // Read and load image
-            if (!GetBinaryImage(filename_path, Thinning::img_)) {
+            if (!GetBinaryImage(filename_path, ChainCodeAlg::img_)) {
                 ob.Cwarning("Unable to open '" + filename + "'");
                 continue;
             }
@@ -825,16 +825,16 @@ void ThebeTests::MemoryTest()
 
             // For all the Algorithms in the array
             for (unsigned i = 0; i < cfg_.thin_mem_algorithms.size(); ++i) {
-                Thinning *algorithm = ThinningMapSingleton::GetThinning(cfg_.thin_mem_algorithms[i].test_name);
+                ChainCodeAlg *algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(cfg_.thin_mem_algorithms[i].test_name);
 
                 // The following data_ structure is used to get the memory access matrices
                 vector<uint64_t> accesses; // Rows represents algorithms and columns represent data_ structures
 
                 try {
-                    algorithm->PerformThinningMem(accesses);
+                    algorithm->PerformChainCodeMem(accesses);
                 }
                 catch (const exception& e) {
-                    algorithm->FreeThinningData();
+                    algorithm->FreeChainCodeData();
                     ob.Cerror("Something wrong with " + cfg_.thin_mem_algorithms[i].test_name + ": " + e.what()); // You should check your algorithms' implementation before performing THeBE tests  
                 }
 
@@ -842,7 +842,7 @@ void ThebeTests::MemoryTest()
                 for (unsigned a = 0; a < accesses.size(); ++a) {
                     memory_accesses_[dataset_name](i, a) += accesses[a];
                 }
-                algorithm->FreeThinningData();
+                algorithm->FreeChainCodeData();
             }
         }
         ob.StopUnitaryBox();

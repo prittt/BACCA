@@ -40,14 +40,14 @@
 
 #include "config_data.h"
 #include "file_manager.h"
-#include "thinning_algorithms.h"
+#include "chaincode_algorithms.h"
 #include "memory_tester.h"
 #include "performance_evaluator.h"
 #include "progress_bar.h"
 #include "stream_demultiplexer.h"
 #include "system_info.h"
 #include "utilities.h"
-#include "thebe_tests.h"
+#include "bacca_tests.h"
 
 using namespace cv;
 using namespace filesystem;
@@ -115,14 +115,14 @@ int main()
         auto& algo_struct = cfg.thin_algorithms[i];
         string algo_name = algo_struct.test_name;
          
-        if (!ThinningMapSingleton::Exists(algo_name)) {
+        if (!ChainCodeAlgMapSingleton::Exists(algo_name)) {
             ob_setconf.Cwarning("Unable to find the algorithm '" + algo_name + "'");
         }
         else {
             cfg.thin_existing_algorithms.push_back(algo_struct);
             if (cfg.perform_correctness) {
                 string check_algo_name = algo_struct.test_name;
-                if (!ThinningMapSingleton::Exists(check_algo_name)) {
+                if (!ChainCodeAlgMapSingleton::Exists(check_algo_name)) {
                     ob_setconf.Cwarning("Unable to find the check algorithm '" + check_algo_name + "'. Correctness test disabled.");
                     cfg.perform_correctness = false;
                 }
@@ -135,21 +135,21 @@ int main()
     }
 
     // Check if labeling methods of the specified algorithms exist
-    Thinning::img_ = Mat1b(1, 1, static_cast<uchar>(0));
+    ChainCodeAlg::img_ = Mat1b(1, 1, static_cast<uchar>(0));
     for (size_t i = 0; i < cfg.thin_existing_algorithms.size(); ++i) {
         auto& algo_struct = cfg.thin_existing_algorithms[i];
         string algo_name = algo_struct.test_name;
-        const auto& algorithm = ThinningMapSingleton::GetThinning(algo_name);
+        const auto& algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(algo_name);
         if (cfg.perform_average || (cfg.perform_correctness && cfg.perform_check_std)) {
             try {
-                algorithm->PerformThinning();
+                algorithm->PerformChainCode();
                 cfg.thin_average_algorithms.push_back(algo_struct);
 
                 if (cfg.perform_correctness && cfg.perform_check_std) {
                     string check_algo_name = algo_struct.check_name;
-                    const auto& check_algorithm = ThinningMapSingleton::GetThinning(check_algo_name);
+                    const auto& check_algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(check_algo_name);
                     try {
-                        check_algorithm->PerformThinning();
+                        check_algorithm->PerformChainCode();
                         // The check name has already been pushed. If it doesn't work properly standard correctness test is disabled (see catch below)
                     }
                     catch (const runtime_error& e) {
@@ -165,14 +165,14 @@ int main()
         }
         if (cfg.perform_average_ws || (cfg.perform_correctness && cfg.perform_check_ws)) {
             try {
-                algorithm->PerformThinningWithSteps();
+                algorithm->PerformChainCodeWithSteps();
                 cfg.thin_average_ws_algorithms.push_back(algo_struct);
 
                 if (cfg.perform_correctness && cfg.perform_check_ws) {
                     string check_algo_name = algo_struct.check_name;
-                    const auto& check_algorithm = ThinningMapSingleton::GetThinning(check_algo_name);
+                    const auto& check_algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(check_algo_name);
                     try {
-                        check_algorithm->PerformThinningWithSteps();
+                        check_algorithm->PerformChainCodeWithSteps();
                         // The check name has already been pushed. If it doesn't work properly steps correctness test is disabled (see catch below)
                     }
                     catch (const runtime_error& e) {
@@ -189,14 +189,14 @@ int main()
         if (cfg.perform_memory || (cfg.perform_correctness && cfg.perform_check_mem)) {
             try {
                 vector<uint64_t> temp;
-                algorithm->PerformThinningMem(temp);
+                algorithm->PerformChainCodeMem(temp);
                 cfg.thin_mem_algorithms.push_back(algo_struct);
 
                 if (cfg.perform_correctness && cfg.perform_check_mem) {
                     string check_algo_name = algo_struct.check_name;
-                    const auto& check_algorithm = ThinningMapSingleton::GetThinning(check_algo_name);
+                    const auto& check_algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(check_algo_name);
                     try {
-                        check_algorithm->PerformThinningMem(temp);
+                        check_algorithm->PerformChainCodeMem(temp);
                         // The check name has already been pushed. If it doesn't work properly memory correctness test is disabled (see catch below)
                     }
                     catch (const runtime_error& e) {
@@ -213,19 +213,19 @@ int main()
     }
 
     if ((cfg.perform_average || (cfg.perform_correctness && cfg.perform_check_std)) && cfg.thin_average_algorithms.size() == 0) {
-        ob_setconf.Cwarning("There are no 'algorithms' with valid 'PerformThinning()' method, related tests will be skipped");
+        ob_setconf.Cwarning("There are no 'algorithms' with valid 'PerformChainCode()' method, related tests will be skipped");
         cfg.perform_average = false;
         cfg.perform_check_std = false;
     }
 
     if ((cfg.perform_average_ws || (cfg.perform_correctness && cfg.perform_check_ws)) && cfg.thin_average_ws_algorithms.size() == 0) {
-        ob_setconf.Cwarning("There are no 'algorithms' with valid 'PerformThinningWithSteps()' method, related tests will be skipped");
+        ob_setconf.Cwarning("There are no 'algorithms' with valid 'PerformChainCodeWithSteps()' method, related tests will be skipped");
         cfg.perform_average_ws = false;
         cfg.perform_check_ws = false;
     }
 
     if ((cfg.perform_memory || (cfg.perform_correctness && cfg.perform_check_mem)) && cfg.thin_mem_algorithms.size() == 0) {
-        ob_setconf.Cwarning("There are no 'algorithms' with valid 'PerformThinningMem()' method, related tests will be skipped");
+        ob_setconf.Cwarning("There are no 'algorithms' with valid 'PerformChainCodeMem()' method, related tests will be skipped");
         cfg.perform_memory = false;
         cfg.perform_check_mem = false;
     }
@@ -350,15 +350,15 @@ int main()
     // Correctness test
     if (cfg.perform_correctness) {
         if (cfg.perform_check_std) {
-            yt.CheckPerformThinning();
+            yt.CheckPerformChainCode();
         }
 
         if (cfg.perform_check_ws) {
-           yt.CheckPerformThinningWithSteps();
+           yt.CheckPerformChainCodeWithSteps();
         }
 
         if (cfg.perform_check_mem) {
-           yt.CheckPerformThinningMem();
+           yt.CheckPerformChainCodeMem();
         }
     }
 

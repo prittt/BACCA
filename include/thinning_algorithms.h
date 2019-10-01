@@ -26,8 +26,8 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_THINNING_ALGORITHMS_H_
-#define THEBE_THINNING_ALGORITHMS_H_
+#ifndef BACCA_CHAIN_CODE_ALGORITHMS_H_
+#define BACCA_CHAIN_CODE_ALGORITHMS_H_
 
 #include <iostream>
 #include <map>
@@ -38,38 +38,38 @@
 
 #include "performance_evaluator.h"
 
-class Thinning {
+class ChainCodeAlg {
 public:
     static cv::Mat1b img_;
-    cv::Mat1b img_out_;
+
     PerformanceEvaluator perf_;
 
-    Thinning() {}
-    virtual ~Thinning() = default;
+    ChainCodeAlg() {}
+    virtual ~ChainCodeAlg() = default;
 
-    virtual void PerformThinning() { throw std::runtime_error("'PerformThinning()' not implemented"); }
-    virtual void PerformThinningWithSteps() { throw std::runtime_error("'PerformThinningWithSteps()' not implemented"); }
-    virtual void PerformThinningMem(std::vector<uint64_t>& accesses) { throw std::runtime_error("'PerformThinningMem(...)' not implemented"); }
+    virtual void PerformChainCode() { throw std::runtime_error("'PerformThinning()' not implemented"); }
+    virtual void PerformChainCodeWithSteps() { throw std::runtime_error("'PerformThinningWithSteps()' not implemented"); }
+    virtual void PerformChainCodeMem(std::vector<uint64_t>& accesses) { throw std::runtime_error("'PerformThinningMem(...)' not implemented"); }
 
-    virtual void FreeThinningData() { img_out_.release(); }
+    virtual void FreeChainCodeData() {}
     
 };
 
-class ThinningMapSingleton {
+class ChainCodeAlgMapSingleton {
 public:
-    std::map<std::string, Thinning*> data_;
+    std::map<std::string, ChainCodeAlg*> data_;
 
-    static ThinningMapSingleton& GetInstance();
-    static Thinning* GetThinning(const std::string& s);
+    static ChainCodeAlgMapSingleton& GetInstance();
+    static ChainCodeAlg* GetChainCodeAlg(const std::string& s);
     static bool Exists(const std::string& s);
-	ThinningMapSingleton(ThinningMapSingleton const&) = delete;
-    void operator=(ThinningMapSingleton const&) = delete;
+    ChainCodeAlgMapSingleton(ChainCodeAlgMapSingleton const&) = delete;
+    void operator=(ChainCodeAlgMapSingleton const&) = delete;
 
 private:
-	ThinningMapSingleton() {}
-    ~ThinningMapSingleton()
+    ChainCodeAlgMapSingleton() {}
+    ~ChainCodeAlgMapSingleton()
     {
-        for (std::map<std::string, Thinning*>::iterator it = data_.begin(); it != data_.end(); ++it)
+        for (std::map<std::string, ChainCodeAlg*>::iterator it = data_.begin(); it != data_.end(); ++it)
             delete it->second;
     }
 };
@@ -83,4 +83,4 @@ enum StepType {
 
 std::string Step(StepType n_step);
 
-#endif //THEBE_THINNING_ALGORITHMS_H_
+#endif // BACCA_CHAIN_CODE_ALGORITHMS_

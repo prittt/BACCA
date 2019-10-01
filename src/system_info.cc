@@ -41,7 +41,7 @@ void SystemInfo::SetCpuBrand()
 {
     cpu_ = "cpu_unknown";
 
-#if defined(_MSC_VER) && defined(THEBE_WINDOWS)
+#if defined(_MSC_VER) && defined(BACCA_WINDOWS)
     // Compiler dependent, works on Windows and Visual Studio
     int cpu_info[4] = { -1 };
     unsigned nExIds, i = 0;
@@ -60,7 +60,7 @@ void SystemInfo::SetCpuBrand()
             memcpy(cpu_name + 32, cpu_info, sizeof(cpu_info));
     }
     cpu_ = { cpu_name };
-#elif defined(THEBE_WINDOWS)
+#elif defined(BACCA_WINDOWS)
     // Compiler independent, works on Windows
     std::system("wmic cpu get name|more > cpu_name.txt");
     ifstream is("cpu_name.txt");
@@ -72,7 +72,7 @@ void SystemInfo::SetCpuBrand()
     std::getline(is, line);
     is.close();
     cpu_ = line;
-#elif defined(THEBE_LINUX) || defined(THEBE_UNIX)
+#elif defined(BACCA_LINUX) || defined(BACCA_UNIX)
     ifstream cpuinfo("/proc/cpuinfo");
     if (!cpuinfo.is_open()) {
         cpu_ = "cpu_unknown";
@@ -86,7 +86,7 @@ void SystemInfo::SetCpuBrand()
     }
     cpuinfo.close();
     cpu_ = cpu_name;
-#elif defined(THEBE_APPLE)
+#elif defined(BACCA_APPLE)
 #define BUFFERLEN 100
     char buffer[BUFFERLEN];
     size_t bufferlen = BUFFERLEN;
@@ -121,7 +121,7 @@ void SystemInfo::SetOsBit()
 {
     os_bit_ = "";
 
-#if defined(THEBE_WINDOWS)
+#if defined(BACCA_WINDOWS)
     // Compiler independent, works on Windows
     typedef BOOL(WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
     LPFN_ISWOW64PROCESS fnIsWow64Process;
@@ -145,7 +145,7 @@ void SystemInfo::SetOsBit()
     else
         os_bit_ = "32 bit";
 
-#elif defined(THEBE_LINUX) || defined(THEBE_UNIX)
+#elif defined(BACCA_LINUX) || defined(BACCA_UNIX)
     struct utsname unameData;
     uname(&unameData);
     string bit = unameData.machine;
@@ -153,7 +153,7 @@ void SystemInfo::SetOsBit()
         os_bit_ = "64 bit";
     else if (bit == "i686")
         os_bit_ = "32 bit";
-#elif defined(THEBE_APPLE)
+#elif defined(BACCA_APPLE)
     // TODO
 #endif
 }

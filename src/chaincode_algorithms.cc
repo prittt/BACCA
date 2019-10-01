@@ -26,48 +26,39 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_THINNING_GUOHALL_1989_H_
-#define THEBE_THINNING_GUOHALL_1989_H_
+#include "chaincode_algorithms.h"
 
-#include <vector>
+cv::Mat1b ChainCodeAlg::img_;
 
-#include <opencv2/core.hpp>
+ChainCodeAlgMapSingleton& ChainCodeAlgMapSingleton::GetInstance()
+{
+    static ChainCodeAlgMapSingleton instance;	// Guaranteed to be destroyed.
+                                            // Instantiated on first use.
+    return instance;
+}
 
-#include "thinning_algorithms.h"
-#include "thinning_iteration.h"
-#include "register.h"
+ChainCodeAlg* ChainCodeAlgMapSingleton::GetChainCodeAlg(const std::string& s)
+{
+    return ChainCodeAlgMapSingleton::GetInstance().data_.at(s);
+}
 
-class GuoHall : public Thinning {
-public:
-    inline static bool should_remove_0(uint16_t block);
-    inline static bool should_remove_1(uint16_t block);
+bool ChainCodeAlgMapSingleton::Exists(const std::string& s)
+{
+    return ChainCodeAlgMapSingleton::GetInstance().data_.end() != ChainCodeAlgMapSingleton::GetInstance().data_.find(s);
+}
 
-    THINNING_ITERATION(0);
-    THINNING_ITERATION(1);
-    PERFORM_THINNING;
-};
+std::string Step(StepType n_step)
+{
+    switch (n_step) {
+    case ALLOC_DEALLOC:
+        return "Alloc Dealloc";
+        break;
+    case THINNING:
+        return "Thinning";
+        break;
+    case ST_SIZE: // To avoid warning on AppleClang
+        break;
+    }
 
-class GuoHallLUT : public Thinning {
-public:
-    inline static bool should_remove_0(uint16_t block);
-    inline static bool should_remove_1(uint16_t block);
-
-    THINNING_ITERATION(0);
-    THINNING_ITERATION(1);
-    PERFORM_THINNING;
-};
-
-class GuoHallTree : public Thinning {
-public:
-    inline static bool thinning_iteration(cv::Mat1b& img, int iter);
-    PERFORM_THINNING_DT
-};
-
-class GuoHallDrag : public Thinning {
-public:
-    inline static bool thinning_iteration(cv::Mat1b& img, int iter);
-    PERFORM_THINNING_DT
-};
-
-#endif // !THEBE_THINNING_GUOHALL_1989_H_
-
+    return "";
+}

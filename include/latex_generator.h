@@ -26,8 +26,8 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef	THEBE_LATEX_GENERATOR_H_
-#define THEBE_LATEX_GENERATOR_H_
+#ifndef	BACCA_LATEX_GENERATOR_H_
+#define BACCA_LATEX_GENERATOR_H_
 
 #include <map>
 #include <opencv2/core.hpp>
@@ -48,4 +48,4 @@ void LatexGenerator(const std::map<std::string, bool>& test_to_perform, const fi
     const cv::Mat1d& all_res, const std::vector<cv::String>& datasets_name, const std::vector<cv::String>& ccl_algorithms,
     const std::vector<cv::String>& ccl_mem_algorithms, const std::map<std::string, cv::Mat1d>& accesses);
 
-#endif // !THEBE_LATEX_GENERATOR_H_
+#endif // !BACCA_LATEX_GENERATOR_H_

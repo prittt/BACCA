@@ -40,7 +40,7 @@
 using namespace std;
 
 const char filesystem::path::separator_ =
-#ifdef THEBE_WINDOWS
+#ifdef BACCA_WINDOWS
 '\\';
 #else
 '/';
@@ -73,7 +73,7 @@ bool filesystem::create_directories(const path& p)
 {
     string s(p.string());
     string parameters = "";
-#if defined(THEBE_UNIX) || defined(THEBE_LINUX) || defined(THEBE_APPLE)
+#if defined(BACCA_UNIX) || defined(BACCA_LINUX) || defined(BACCA_APPLE)
     // make it recursive by adding "-p" suffix
     parameters = "-p";
 #endif
@@ -94,9 +94,9 @@ bool filesystem::create_directories(const path& p, error_code& ec)
 
 void filesystem::path::NormalizePath()
 {
-#if defined(THEBE_UNIX) || defined(THEBE_LINUX) || defined(THEBE_APPLE)
+#if defined(BACCA_UNIX) || defined(BACCA_LINUX) || defined(BACCA_APPLE)
     std::replace(path_.begin(), path_.end(), '\\', '/');
-#elif defined(THEBE_WINDOWS)
+#elif defined(BACCA_WINDOWS)
     std::replace(path_.begin(), path_.end(), '/', '\\');
 #endif
 

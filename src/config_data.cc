@@ -58,9 +58,9 @@ ConfigData::ConfigData(const FileStorage& fs) {
     input_txt = "files.txt";
     gnuplot_script_extension = ".gnuplot";
     system_script_extension =
-#ifdef THEBE_WINDOWS
+#ifdef BACCA_WINDOWS
         ".bat";
-#elif defined(THEBE_LINUX) || defined(THEBE_UNIX) || defined(THEBE_APPLE)
+#elif defined(BACCA_LINUX) || defined(BACCA_UNIX) || defined(BACCA_APPLE)
         ".sh";
 #endif
     output_image_folder = "output_images";

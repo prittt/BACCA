@@ -26,8 +26,8 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_FILE_MANAGER_H_
-#define THEBE_FILE_MANAGER_H_
+#ifndef BACCA_FILE_MANAGER_H_
+#define BACCA_FILE_MANAGER_H_
 
 #include <string>
 #include <system_error>
@@ -146,4 +146,4 @@ void copy(const path& from, const path& to);
 void copy(const path& from, const path& to, std::error_code& ec);
 };
 
-#endif // !THEBE_FILE_MANAGER_H_
+#endif // !BACCA_FILE_MANAGER_H_

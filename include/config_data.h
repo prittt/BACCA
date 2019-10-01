@@ -26,8 +26,8 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_CONFIG_DATA_H_
-#define THEBE_CONFIG_DATA_H_
+#ifndef BACCA_CONFIG_DATA_H_
+#define BACCA_CONFIG_DATA_H_
 
 #include <opencv2/imgproc.hpp>
 
@@ -98,4 +98,4 @@ struct ConfigData {
     void ReadAlgorithms(const cv::FileStorage& fs);
 };
 
-#endif // !THEBE_CONFIG_DATA_H_
+#endif // !BACCA_CONFIG_DATA_H_

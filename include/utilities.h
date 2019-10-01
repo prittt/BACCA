@@ -26,8 +26,8 @@
 // OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef THEBE_UTILITIES_H_
-#define THEBE_UTILITIES_H_
+#ifndef BACCA_UTILITIES_H_
+#define BACCA_UTILITIES_H_
 
 #include <string>
 #include <opencv2/core.hpp>
@@ -92,4 +92,4 @@ std::string GetGnuplotTitle(ConfigData& cfg);
 std::string EscapeUnderscore(const std::string& s);
 std::string DoubleEscapeUnderscore(const std::string& s);
 
-#endif // !THEBE_UTILITIES_H_
+#endif // !BACCA_UTILITIES_H_
