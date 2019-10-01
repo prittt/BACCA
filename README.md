@@ -1,4 +1,4 @@
-[](doc/bacca.png)
+<img src="doc/BACCA.png" height="150px" align="right">
 
 # BACCA: Benchmark Another Chain Code Algorithm
 
