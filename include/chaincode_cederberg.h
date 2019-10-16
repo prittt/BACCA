@@ -43,7 +43,7 @@ public:
 };
 
 class Cederberg_DRAG : public ChainCodeAlg {
-
+public:
     RCCode rccode;
 
 public:
@@ -54,5 +54,19 @@ public:
         rccode.Clean();
     }
 };
+
+class Cederberg_DRAG_2 : public ChainCodeAlg {
+public:
+    RCCode rccode;
+
+public:
+    virtual void PerformChainCode();
+
+    virtual void FreeChainCodeData() {
+        ChainCodeAlg::FreeChainCodeData();
+        rccode.Clean();
+    }
+};
+
 
 #endif // BACCA_CHAINCODE_CEDERBERG_H_

@@ -37,16 +37,16 @@
 
 struct RCCode {
 
-    struct Elem {
+    struct Elem  {
 
         struct Chain {
             std::vector<uint8_t> vals;
-            unsigned elem; // index of the corresponding elem in the vector
+            unsigned elem; // index of the corresponding elem in vector
             bool right;
 
             Chain() {}
             Chain(unsigned elem_, bool right_) : elem(elem_), right(right_) {}
-            auto push_back(uint8_t val) -> decltype(vals.push_back(val)) { return vals.push_back(val); }
+            auto push_back(uint8_t val) { return vals.push_back(val); }
             auto begin() { return vals.begin(); }
             auto begin() const { return vals.begin(); }
             auto end() { return vals.end(); }
@@ -84,6 +84,7 @@ struct RCCode {
 
     void Clean() {
         data.resize(0);
+        data.shrink_to_fit();
     }
 };
 
@@ -111,7 +112,7 @@ struct ChainCode {
 
     ChainCode() {}
     ChainCode(const RCCode& rccode);
-    ChainCode(const std::vector<std::vector<cv::Point>>& contours);
+    ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool contrary = false);
 
     const Chain& operator[](size_t pos) const { return chains[pos]; }
     std::vector<Chain>::const_iterator begin() const { return chains.begin(); }
@@ -126,6 +127,7 @@ struct ChainCode {
 
     void Clean() {
         chains.resize(0);
+        chains.shrink_to_fit();
     }
 
 };

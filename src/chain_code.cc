@@ -28,7 +28,7 @@
 
 #include "chain_code.h"
 
-ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours) {
+ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool contrary) {
     for (const std::vector<cv::Point>& contour : contours) {
 
         // Find top-left value
@@ -46,26 +46,51 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours) {
 
         if (contour.size() > 1) {
 
-            for (int i = top - 1 + contour.size(); i >= top; i--) { // OpenCV order is reversed
+            if (contrary) {
+                for (int i = top - 1 + contour.size(); i >= top; i--) { // OpenCV order is reversed
 
-                cv::Point cur = contour[i % contour.size()];
-                cv::Point diff = cur - prev;
+                    cv::Point cur = contour[i % contour.size()];
+                    cv::Point diff = cur - prev;
 
-                int link;
-                if (diff.x == -1) {
-                    link = diff.y + 4;
+                    int link;
+                    if (diff.x == -1) {
+                        link = diff.y + 4;
+                    }
+                    else if (diff.x == 0) {
+                        link = diff.y * 2 + 4;
+                    }
+                    else if (diff.x == 1) {
+                        link = (8 - diff.y) % 8;
+                    }
+
+                    chain.vals.push_back(link);
+
+                    prev = cur;
+
                 }
-                else if (diff.x == 0) {
-                    link = diff.y * 2 + 4;
+            }
+            else {
+                for (int i = top + 1; i <= top + contour.size(); i++) {
+
+                    cv::Point cur = contour[i % contour.size()];
+                    cv::Point diff = cur - prev;
+
+                    int link;
+                    if (diff.x == -1) {
+                        link = diff.y + 4;
+                    }
+                    else if (diff.x == 0) {
+                        link = diff.y * 2 + 4;
+                    }
+                    else if (diff.x == 1) {
+                        link = (8 - diff.y) % 8;
+                    }
+
+                    chain.vals.push_back(link);
+
+                    prev = cur;
+
                 }
-                else if (diff.x == 1) {
-                    link = (8 - diff.y) % 8;
-                }
-
-                chain.vals.push_back(link);
-
-                prev = cur;
-
             }
 
         }

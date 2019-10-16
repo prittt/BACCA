@@ -10,7 +10,7 @@ void ChainCodeCorrect::PerformChainCode() {
 
     vector<vector<Point>> cv_contours;
     findContours(img_, cv_contours, RETR_LIST, CHAIN_APPROX_NONE);
-    chain_code_ = ChainCode(cv_contours);
+    chain_code_ = ChainCode(cv_contours, true);
 
 }
 
