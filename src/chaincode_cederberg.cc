@@ -272,7 +272,7 @@ void ConnectChains_2(RCCode& rccode, int* new_chains, int i1, int i2) {
 }
 
 
-void ProcessPixel(int r, int c, unsigned short state, RCCode& rccode, list<unsigned>& chains, list<unsigned>::iterator& it) {
+void ProcessPixelNaive(int r, int c, unsigned short state, RCCode& rccode, list<unsigned>& chains, list<unsigned>::iterator& it) {
 
     if (state == 10) {
         // state == 10 is the only single-pixel case
@@ -415,7 +415,7 @@ void ProcessPixel(int r, int c, unsigned short state, RCCode& rccode, list<unsig
     }
 
 }
-
+/*
 void ProcessPixel(int r, int c, unsigned short state, uint8_t links_found, RCCode& rccode, list<pair<unsigned, bool>>& chains, list<pair<unsigned, bool>>::iterator& it) {
 
     if (state == 10) {
@@ -549,7 +549,7 @@ void ProcessPixel(int r, int c, unsigned short state, uint8_t links_found, RCCod
     }
 
 }
-
+*/
 // Without information about left/right in list of chains
 inline void ProcessPixel(int r, int c, unsigned short state, uint8_t links_found, RCCode& rccode, list<unsigned>& chains, list<unsigned>::iterator& it) {
 
@@ -918,7 +918,7 @@ void Cederberg::PerformChainCode() {
 
             unsigned short state = TemplateCheck::CheckState(condition);
 
-            ProcessPixel(r, c, state, rccode, chains, it);
+            ProcessPixelNaive(r, c, state, rccode, chains, it);
         }
 
         previous_row_ptr = row_ptr;
@@ -959,7 +959,7 @@ void Cederberg_LUT::PerformChainCode() {
 
             unsigned short state = table[condition];
 
-            ProcessPixel(r, c, state, rccode, chains, it);
+            ProcessPixelNaive(r, c, state, rccode, chains, it);
         }
 
         previous_row_ptr = row_ptr;
@@ -995,7 +995,7 @@ void Cederberg_LUT_PRED::PerformChainCode() {
         if (r + 1 < img_.rows && 1 < img_.cols && next_row_ptr[1])    condition |= PIXEL_H;
 
         unsigned short state = table[condition];
-        ProcessPixel(r, 0, state, rccode, chains, it);
+        ProcessPixelNaive(r, 0, state, rccode, chains, it);
 
         // Middle columns
         for (int c = 1; c < img_.cols - 1; c++) {
@@ -1008,7 +1008,7 @@ void Cederberg_LUT_PRED::PerformChainCode() {
             if (r + 1 < img_.rows && next_row_ptr[c + 1])    condition |= PIXEL_H;
 
             state = table[condition];
-            ProcessPixel(r, c, state, rccode, chains, it);
+            ProcessPixelNaive(r, c, state, rccode, chains, it);
         }
 
         // Last column
@@ -1016,7 +1016,7 @@ void Cederberg_LUT_PRED::PerformChainCode() {
         condition &= ~(PIXEL_C | PIXEL_E | PIXEL_H);
 
         state = table[condition];
-        ProcessPixel(r, img_.cols - 1, state, rccode, chains, it);
+        ProcessPixelNaive(r, img_.cols - 1, state, rccode, chains, it);
 
         previous_row_ptr = row_ptr;
         row_ptr = next_row_ptr;
@@ -1027,6 +1027,9 @@ void Cederberg_LUT_PRED::PerformChainCode() {
 }
 
 void Cederberg_DRAG::PerformChainCode() {
+
+    RCCode rccode;
+    //rccode.data.reserve(500);
 
     list<unsigned> chains;
 
@@ -1216,7 +1219,7 @@ void Cederberg_DRAG::PerformChainCode() {
 
     chain_code_ = ChainCode(rccode);
 }
-
+/*
 // Slower than DRAG
 void Cederberg_DRAG_2::PerformChainCode() {
 
@@ -1411,7 +1414,7 @@ void Cederberg_DRAG_2::PerformChainCode() {
 
     chain_code_ = ChainCode(rccode);
 }
-
+*/
 
 #undef D0A         
 #undef D0B         
@@ -1440,4 +1443,4 @@ REGISTER_CHAINCODEALG(Cederberg)
 REGISTER_CHAINCODEALG(Cederberg_LUT)
 REGISTER_CHAINCODEALG(Cederberg_LUT_PRED)
 REGISTER_CHAINCODEALG(Cederberg_DRAG)
-REGISTER_CHAINCODEALG(Cederberg_DRAG_2)
+//REGISTER_CHAINCODEALG(Cederberg_DRAG_2)

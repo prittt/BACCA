@@ -122,7 +122,8 @@ bool ChainCode::Chain::operator<(const Chain& rhs) const {
 
 void ChainCode::Chain::AddRightChain(const RCCode::Elem::Chain& chain) {
 
-    for (auto val : chain.vals) {
+    for (unsigned i = 0; i < chain.value_count; i++) {
+        uint8_t val = chain.get_value(i);
         uint8_t new_val;
         if (val == 0) {
             new_val = 0;
@@ -137,12 +138,9 @@ void ChainCode::Chain::AddRightChain(const RCCode::Elem::Chain& chain) {
 
 void ChainCode::Chain::AddLeftChain(const RCCode::Elem::Chain& chain) {
 
-    for (auto it = chain.vals.rbegin(); it != chain.vals.rend(); it++) {
-        const uint8_t& val = *it;
-
-        uint8_t new_val = 4 - val;
-
-        vals.push_back(new_val);
+    for (int i = chain.value_count - 1; i >= 0; i--) {
+        uint8_t val = 4 - chain.get_value(i);
+        vals.push_back(val);
     }
 }
 

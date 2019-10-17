@@ -40,17 +40,30 @@ struct RCCode {
     struct Elem  {
 
         struct Chain {
-            std::vector<uint8_t> vals;
+        private:
+            std::vector<uint32_t> internal_values;
             unsigned elem; // index of the corresponding elem in vector
-            bool right;
+        public:
+            size_t value_count = 0;
 
             Chain() {}
-            Chain(unsigned elem_, bool right_) : elem(elem_), right(right_) {}
-            auto push_back(uint8_t val) { return vals.push_back(val); }
-            auto begin() { return vals.begin(); }
-            auto begin() const { return vals.begin(); }
-            auto end() { return vals.end(); }
-            auto end() const { return vals.end(); }
+            Chain(unsigned elem_) : elem(elem_) {}
+            void push_back(uint8_t val) {
+                if (value_count % 16 == 0) {
+                    internal_values.push_back(0);
+                }
+
+                internal_values[internal_values.size() - 1] |= ((val & 3) << ((value_count % 16) * 2));
+                value_count++;
+            }
+            const uint8_t get_value(unsigned index) const {
+                int internal_index = index / 16;
+                return (internal_values[internal_index] >> ((index % 16) * 2)) & 3;
+            }
+            //auto begin() { return vals.begin(); }
+            //auto begin() const { return vals.begin(); }
+            //auto end() { return vals.end(); }
+            //auto end() const { return vals.end(); }
         };
 
         unsigned row, col;
@@ -59,7 +72,7 @@ struct RCCode {
         unsigned next; // vector index of the elem whose left chain is linked to this elem right chain
 
         Elem() {}
-        Elem(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(elem_, false), right(elem_, true), next(elem_) {}
+        Elem(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(elem_), right(elem_), next(elem_) {}
 
         Chain& operator[](bool right_) {
             if (right_) return right;
@@ -83,8 +96,9 @@ struct RCCode {
     const Elem& operator[](unsigned pos) const { return data[pos]; }
 
     void Clean() {
-        data.resize(0);
-        data.shrink_to_fit();
+        data = std::vector<Elem>();
+        //data.resize(0);
+        //data.shrink_to_fit();
     }
 };
 
@@ -126,8 +140,9 @@ struct ChainCode {
     }
 
     void Clean() {
-        chains.resize(0);
-        chains.shrink_to_fit();
+        chains = std::vector<Chain>();
+        //chains.resize(0);
+        //chains.shrink_to_fit();
     }
 
 };
