@@ -50,11 +50,11 @@ bool ChainCodeAlgMapSingleton::Exists(const std::string& s)
 std::string Step(StepType n_step)
 {
     switch (n_step) {
-    case ALLOC_DEALLOC:
-        return "Alloc Dealloc";
+    case ALGORITHM:
+        return "Algorithm";
         break;
-    case THINNING:
-        return "Thinning";
+    case CONVERSION:
+        return "Conversion";
         break;
     case ST_SIZE: // To avoid warning on AppleClang
         break;

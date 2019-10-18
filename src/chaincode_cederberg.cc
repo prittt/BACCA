@@ -550,13 +550,86 @@ void ProcessPixel(int r, int c, unsigned short state, uint8_t links_found, RCCod
 
 }
 */
+
 // Without information about left/right in list of chains
-inline void ProcessPixel(int r, int c, unsigned short state, uint8_t links_found, RCCode& rccode, list<unsigned>& chains, list<unsigned>::iterator& it) {
+template <unsigned short state>
+inline void ProcessPixel(int r, int c, RCCode& rccode, list<unsigned>& chains, list<unsigned>::iterator& it) {
 
     if (state == 10) {
         // state == 10 is the only single-pixel case
         rccode.AddElem(r, c);
         return;
+    }
+
+    uint8_t links_found;
+
+    switch (state) {
+    case 0:     links_found = 0; break;
+    case 1:     links_found = 0; break;
+    case 2:     links_found = 0; break;
+    case 3:     links_found = 0; break;
+    case 10:    links_found = 0; break;
+    case 16:    links_found = 1; break;
+    case 17:    links_found = 1; break;
+    case 32:    links_found = 1; break;
+    case 33:    links_found = 1; break;
+    case 48:    links_found = 2; break;
+    case 49:    links_found = 2; break;
+    case 56:    links_found = 2; break;
+    case 64:    links_found = 1; break;
+    case 65:    links_found = 1; break;
+    case 128:   links_found = 1; break;
+    case 129:   links_found = 1; break;
+    case 144:   links_found = 2; break;
+    case 145:   links_found = 2; break;
+    case 152:   links_found = 2; break;
+    case 192:   links_found = 2; break;
+    case 193:   links_found = 2; break;
+    case 200:   links_found = 2; break;
+    case 256:   links_found = 1; break;
+    case 257:   links_found = 1; break;
+    case 292:   links_found = 2; break;
+    case 293:   links_found = 2; break;
+    case 308:   links_found = 3; break;
+    case 309:   links_found = 3; break;
+    case 512:   links_found = 1; break;
+    case 513:   links_found = 1; break;
+    case 528:   links_found = 2; break;
+    case 529:   links_found = 2; break;
+    case 536:   links_found = 2; break;
+    case 576:   links_found = 2; break;
+    case 577:   links_found = 2; break;
+    case 584:   links_found = 2; break;
+    case 768:   links_found = 2; break;
+    case 769:   links_found = 2; break;
+    case 776:   links_found = 2; break;
+    case 804:   links_found = 3; break;
+    case 805:   links_found = 3; break;
+    case 820:   links_found = 4; break;
+    case 821:   links_found = 4; break;
+    case 828:   links_found = 4; break;
+    case 1024:  links_found = 1; break;
+    case 1025:  links_found = 1; break;
+    case 1060:  links_found = 2; break;
+    case 1061:  links_found = 2; break;
+    case 1076:  links_found = 3; break;
+    case 1077:  links_found = 3; break;
+    case 2048:  links_found = 1; break;
+    case 2064:  links_found = 2; break;
+    case 2072:  links_found = 2; break;
+    case 2112:  links_found = 2; break;
+    case 2120:  links_found = 2; break;
+    case 2304:  links_found = 2; break;
+    case 2312:  links_found = 2; break;
+    case 2340:  links_found = 3; break;
+    case 2356:  links_found = 4; break;
+    case 2364:  links_found = 4; break;
+    case 3072:  links_found = 2; break;
+    case 3080:  links_found = 2; break;
+    case 3108:  links_found = 3; break;
+    case 3124:  links_found = 4; break;
+    case 3132:  links_found = 4; break;
+    default:    return;          break;
     }
 
     bool last_found_right = false;
@@ -580,49 +653,49 @@ inline void ProcessPixel(int r, int c, unsigned short state, uint8_t links_found
 
         // Chains' links
         if (state & D0A) {
-            rccode[*it][false].push_back(0);
+            rccode[*it].left.push_back(0);
             last_found_right = false;
             it++;
         }
 
         if (state & D0B) {
-            rccode[*it][true].push_back(0);
+            rccode[*it].right.push_back(0);
             last_found_right = true;
             it++;
         }
 
         if (state & D1A) {
-            rccode[*it][false].push_back(1);
+            rccode[*it].left.push_back(1);
             last_found_right = false;
             it++;
         }
 
         if (state & D1B) {
-            rccode[*it][true].push_back(1);
+            rccode[*it].right.push_back(1);
             last_found_right = true;
             it++;
         }
 
         if (state & D2A) {
-            rccode[*it][false].push_back(2);
+            rccode[*it].left.push_back(2);
             last_found_right = false;
             it++;
         }
 
         if (state & D2B) {
-            rccode[*it][true].push_back(2);
+            rccode[*it].right.push_back(2);
             last_found_right = true;
             it++;
         }
 
         if (state & D3A) {
-            rccode[*it][false].push_back(3);
+            rccode[*it].left.push_back(3);
             last_found_right = false;
             it++;
         }
 
         if (state & D3B) {
-            rccode[*it][true].push_back(3);
+            rccode[*it].right.push_back(3);
             last_found_right = true;
             it++;
         }
@@ -703,191 +776,193 @@ unsigned PrevChain(vector<int>& chains, int i) {
     return i;
 }
 
-void ProcessPixel_2(int r, int c, unsigned short state, RCCode& rccode, vector<int>& chains, vector<int>& next_chains, int& it) {
-
-    // sinistra pari, destra dispari
-
-    if (state == 10) {
-        // state == 10 is the only single-pixel case
-        rccode.AddElem(r, c);
-        return;
-    }
-
-    int new_chains[4] = { -1, -1, -1, -1 };
-
-    uint8_t links_found = 0;
-
-    bool last_found_right = false;
-
-    if (state & MAX_OUTER) {
-        rccode.AddElem(r, c);
-
-        new_chains[0] = (rccode.Size() - 1) * 2;
-        new_chains[3] = (rccode.Size() - 1) * 2 + 1;
-
-        last_found_right = true;
-        links_found = 2;
-    }
-    else {
-
-        int i_0 = c * 4;
-        int i = c * 4 - 5;
-
-        if ((state & D0A) || (state & D0B)) {
-            i_0 = PrevChain(next_chains, i_0);
-        }
-        if ((state & D0A) && (state & D0B)) {
-            i_0 = PrevChain(next_chains, i_0);
-        }
-
-        // Chains' links
-        if (state & D0A) {
-            rccode[next_chains[i_0] / 2][false].push_back(0);
-            last_found_right = false;
-            new_chains[links_found] = next_chains[i_0];
-            next_chains[i_0] = -1;
-            links_found++;
-            if (state & D0B) {
-                i_0 = NextChain(next_chains, i_0);
-            }
-        }
-
-        if (state & D0B) {
-            rccode[next_chains[i_0] / 2][true].push_back(0);
-            last_found_right = true;
-            new_chains[links_found] = next_chains[i_0];
-            next_chains[i_0] = -1;
-            links_found++;
-        }
-
-        if (state & D1A) {
-            i = NextChain(chains, i);
-            rccode[chains[i] / 2][false].push_back(1);
-            last_found_right = false;
-            new_chains[links_found] = chains[i];
-            chains[i] = -1;
-            links_found++;
-        }
-
-        if (state & D1B) {
-            i = NextChain(chains, i);
-            rccode[chains[i] / 2][true].push_back(1);
-            last_found_right = true;
-            new_chains[links_found] = chains[i];
-            chains[i] = -1;
-            links_found++;
-        }
-
-        if (state & D2A) {
-            i = NextChain(chains, i);
-            rccode[chains[i] / 2][false].push_back(2);
-            last_found_right = false;
-            new_chains[links_found] = chains[i];
-            chains[i] = -1;
-            links_found++;
-        }
-
-        if (state & D2B) {
-            i = NextChain(chains, i);
-            rccode[chains[i] / 2][true].push_back(2);
-            last_found_right = true;
-            new_chains[links_found] = chains[i];
-            chains[i] = -1;
-            links_found++;
-        }
-
-        if (state & D3A) {
-            i = NextChain(chains, i);
-            rccode[chains[i] / 2][false].push_back(3);
-            last_found_right = false;
-            new_chains[links_found] = chains[i];
-            chains[i] = -1;
-            links_found++;
-        }
-
-        if (state & D3B) {
-            i = NextChain(chains, i);
-            rccode[chains[i] / 2][true].push_back(3);
-            last_found_right = true;
-            new_chains[links_found] = chains[i];
-            chains[i] = -1;
-            links_found++;
-        }
-
-        // Min points
-        if ((state & MIN_INNER) && (state & MIN_OUTER)) {
-            // 4 chains met, connect 2nd and 3rd, then 1st and 4th.
-            ConnectChains_2(rccode, new_chains, 1, 2);
-            ConnectChains_2(rccode, new_chains, 0, 3);
-            links_found = 0;
-        }
-        else if ((state & MIN_INNER) || (state & MIN_OUTER)) {
-            if (links_found == 2) {
-                // 2 chains met, connect them
-                ConnectChains_2(rccode, new_chains, 0, 1);
-                links_found = 0;
-            }
-            else if (links_found == 3) {
-                if ((state & D3A) && (state & D3B)) {
-                    // 3 chains met, connect 1st and 2nd
-                    ConnectChains_2(rccode, new_chains, 0, 1);
-                    new_chains[0] = new_chains[2];
-                    new_chains[2] = -1;
-                }
-                else {
-                    // 3 chains met, connect 2nd and 3rd
-                    ConnectChains_2(rccode, new_chains, 1, 2);
-                }
-                links_found = 1;
-            }
-            else {
-                // 4 chains met, connect 2nd and 3rd
-                ConnectChains_2(rccode, new_chains, 1, 2);
-                new_chains[1] = new_chains[3];
-                new_chains[3] = -1;
-                links_found = 2;
-            }
-        }
-
-    }
-
-    if (state & MAX_INNER) {
-        rccode.AddElem(r, c);
-
-        if (links_found == 0 || (state & MAX_INNER)) {
-            new_chains[1] = (rccode.Size() - 1) * 2 + 1;
-            new_chains[2] = (rccode.Size() - 1) * 2;
-        }
-        else if (links_found == 1) {
-            new_chains[1] = (rccode.Size() - 1) * 2 + 1;
-            new_chains[2] = (rccode.Size() - 1) * 2;
-            if (last_found_right) {
-                new_chains[3] = new_chains[0];
-                new_chains[0] = -1;
-            }
-        }
-        else if (links_found == 2) {
-            if (last_found_right) {
-                new_chains[3] = new_chains[1];
-                new_chains[1] = (rccode.Size() - 1) * 2 + 1;
-                new_chains[2] = (rccode.Size() - 1) * 2;
-            }
-            else {
-                new_chains[2] = (rccode.Size() - 1) * 2 + 1;
-                new_chains[3] = (rccode.Size() - 1) * 2;
-            }
-        }
-
-        links_found += 2;
-    }
-
-
-    memcpy(next_chains.data() + c * 4, new_chains, 4 * sizeof(int));
-
-}
+//void ProcessPixel_2(int r, int c, unsigned short state, RCCode& rccode, vector<int>& chains, vector<int>& next_chains, int& it) {
+//
+//    // sinistra pari, destra dispari
+//
+//    if (state == 10) {
+//        // state == 10 is the only single-pixel case
+//        rccode.AddElem(r, c);
+//        return;
+//    }
+//
+//    int new_chains[4] = { -1, -1, -1, -1 };
+//
+//    uint8_t links_found = 0;
+//
+//    bool last_found_right = false;
+//
+//    if (state & MAX_OUTER) {
+//        rccode.AddElem(r, c);
+//
+//        new_chains[0] = (rccode.Size() - 1) * 2;
+//        new_chains[3] = (rccode.Size() - 1) * 2 + 1;
+//
+//        last_found_right = true;
+//        links_found = 2;
+//    }
+//    else {
+//
+//        int i_0 = c * 4;
+//        int i = c * 4 - 5;
+//
+//        if ((state & D0A) || (state & D0B)) {
+//            i_0 = PrevChain(next_chains, i_0);
+//        }
+//        if ((state & D0A) && (state & D0B)) {
+//            i_0 = PrevChain(next_chains, i_0);
+//        }
+//
+//        // Chains' links
+//        if (state & D0A) {
+//            rccode[next_chains[i_0] / 2][false].push_back(0);
+//            last_found_right = false;
+//            new_chains[links_found] = next_chains[i_0];
+//            next_chains[i_0] = -1;
+//            links_found++;
+//            if (state & D0B) {
+//                i_0 = NextChain(next_chains, i_0);
+//            }
+//        }
+//
+//        if (state & D0B) {
+//            rccode[next_chains[i_0] / 2][true].push_back(0);
+//            last_found_right = true;
+//            new_chains[links_found] = next_chains[i_0];
+//            next_chains[i_0] = -1;
+//            links_found++;
+//        }
+//
+//        if (state & D1A) {
+//            i = NextChain(chains, i);
+//            rccode[chains[i] / 2][false].push_back(1);
+//            last_found_right = false;
+//            new_chains[links_found] = chains[i];
+//            chains[i] = -1;
+//            links_found++;
+//        }
+//
+//        if (state & D1B) {
+//            i = NextChain(chains, i);
+//            rccode[chains[i] / 2][true].push_back(1);
+//            last_found_right = true;
+//            new_chains[links_found] = chains[i];
+//            chains[i] = -1;
+//            links_found++;
+//        }
+//
+//        if (state & D2A) {
+//            i = NextChain(chains, i);
+//            rccode[chains[i] / 2][false].push_back(2);
+//            last_found_right = false;
+//            new_chains[links_found] = chains[i];
+//            chains[i] = -1;
+//            links_found++;
+//        }
+//
+//        if (state & D2B) {
+//            i = NextChain(chains, i);
+//            rccode[chains[i] / 2][true].push_back(2);
+//            last_found_right = true;
+//            new_chains[links_found] = chains[i];
+//            chains[i] = -1;
+//            links_found++;
+//        }
+//
+//        if (state & D3A) {
+//            i = NextChain(chains, i);
+//            rccode[chains[i] / 2][false].push_back(3);
+//            last_found_right = false;
+//            new_chains[links_found] = chains[i];
+//            chains[i] = -1;
+//            links_found++;
+//        }
+//
+//        if (state & D3B) {
+//            i = NextChain(chains, i);
+//            rccode[chains[i] / 2][true].push_back(3);
+//            last_found_right = true;
+//            new_chains[links_found] = chains[i];
+//            chains[i] = -1;
+//            links_found++;
+//        }
+//
+//        // Min points
+//        if ((state & MIN_INNER) && (state & MIN_OUTER)) {
+//            // 4 chains met, connect 2nd and 3rd, then 1st and 4th.
+//            ConnectChains_2(rccode, new_chains, 1, 2);
+//            ConnectChains_2(rccode, new_chains, 0, 3);
+//            links_found = 0;
+//        }
+//        else if ((state & MIN_INNER) || (state & MIN_OUTER)) {
+//            if (links_found == 2) {
+//                // 2 chains met, connect them
+//                ConnectChains_2(rccode, new_chains, 0, 1);
+//                links_found = 0;
+//            }
+//            else if (links_found == 3) {
+//                if ((state & D3A) && (state & D3B)) {
+//                    // 3 chains met, connect 1st and 2nd
+//                    ConnectChains_2(rccode, new_chains, 0, 1);
+//                    new_chains[0] = new_chains[2];
+//                    new_chains[2] = -1;
+//                }
+//                else {
+//                    // 3 chains met, connect 2nd and 3rd
+//                    ConnectChains_2(rccode, new_chains, 1, 2);
+//                }
+//                links_found = 1;
+//            }
+//            else {
+//                // 4 chains met, connect 2nd and 3rd
+//                ConnectChains_2(rccode, new_chains, 1, 2);
+//                new_chains[1] = new_chains[3];
+//                new_chains[3] = -1;
+//                links_found = 2;
+//            }
+//        }
+//
+//    }
+//
+//    if (state & MAX_INNER) {
+//        rccode.AddElem(r, c);
+//
+//        if (links_found == 0 || (state & MAX_INNER)) {
+//            new_chains[1] = (rccode.Size() - 1) * 2 + 1;
+//            new_chains[2] = (rccode.Size() - 1) * 2;
+//        }
+//        else if (links_found == 1) {
+//            new_chains[1] = (rccode.Size() - 1) * 2 + 1;
+//            new_chains[2] = (rccode.Size() - 1) * 2;
+//            if (last_found_right) {
+//                new_chains[3] = new_chains[0];
+//                new_chains[0] = -1;
+//            }
+//        }
+//        else if (links_found == 2) {
+//            if (last_found_right) {
+//                new_chains[3] = new_chains[1];
+//                new_chains[1] = (rccode.Size() - 1) * 2 + 1;
+//                new_chains[2] = (rccode.Size() - 1) * 2;
+//            }
+//            else {
+//                new_chains[2] = (rccode.Size() - 1) * 2 + 1;
+//                new_chains[3] = (rccode.Size() - 1) * 2;
+//            }
+//        }
+//
+//        links_found += 2;
+//    }
+//
+//
+//    memcpy(next_chains.data() + c * 4, new_chains, 4 * sizeof(int));
+//
+//}
 
 
 void Cederberg::PerformChainCode() {
+
+    RCCode rccode;
 
     list<unsigned> chains;
 
@@ -931,6 +1006,8 @@ void Cederberg::PerformChainCode() {
 
 void Cederberg_LUT::PerformChainCode() {
 
+    RCCode rccode;
+
 #include "cederberg_lut.inc"
 
     list<unsigned> chains;
@@ -971,6 +1048,8 @@ void Cederberg_LUT::PerformChainCode() {
 }
 
 void Cederberg_LUT_PRED::PerformChainCode() {
+
+    RCCode rccode;
 
 #include "cederberg_lut.inc"
 
@@ -1050,71 +1129,71 @@ void Cederberg_DRAG::PerformChainCode() {
 #define CONDITION_G     (r + 1 < h && next_row_ptr[c])                          
 #define CONDITION_H     (r + 1 < h && next_row_ptr[c + 1]) 
 
-#define ACTION_1    ProcessPixel(r, c, 0	, 0, rccode, chains, it);
-#define ACTION_2    ProcessPixel(r, c, 1	, 0, rccode, chains, it);
-#define ACTION_3    ProcessPixel(r, c, 2	, 0, rccode, chains, it);
-#define ACTION_4    ProcessPixel(r, c, 3	, 0, rccode, chains, it);
-#define ACTION_5    ProcessPixel(r, c, 10	, 0, rccode, chains, it);
-#define ACTION_6    ProcessPixel(r, c, 16	, 1, rccode, chains, it);
-#define ACTION_7    ProcessPixel(r, c, 17	, 1, rccode, chains, it);
-#define ACTION_8    ProcessPixel(r, c, 32	, 1, rccode, chains, it);
-#define ACTION_9    ProcessPixel(r, c, 33	, 1, rccode, chains, it);
-#define ACTION_10   ProcessPixel(r, c, 48	, 2, rccode, chains, it);
-#define ACTION_11   ProcessPixel(r, c, 49	, 2, rccode, chains, it);
-#define ACTION_12   ProcessPixel(r, c, 56	, 2, rccode, chains, it);
-#define ACTION_13   ProcessPixel(r, c, 64  	, 1, rccode, chains, it);
-#define ACTION_14   ProcessPixel(r, c, 65	, 1, rccode, chains, it);
-#define ACTION_15   ProcessPixel(r, c, 128  , 1, rccode, chains, it);
-#define ACTION_16   ProcessPixel(r, c, 129  , 1, rccode, chains, it);
-#define ACTION_17   ProcessPixel(r, c, 144  , 2, rccode, chains, it);
-#define ACTION_18   ProcessPixel(r, c, 145  , 2, rccode, chains, it);
-#define ACTION_19   ProcessPixel(r, c, 152  , 2, rccode, chains, it);
-#define ACTION_20   ProcessPixel(r, c, 192  , 2, rccode, chains, it);
-#define ACTION_21   ProcessPixel(r, c, 193  , 2, rccode, chains, it);
-#define ACTION_22   ProcessPixel(r, c, 200  , 2, rccode, chains, it);
-#define ACTION_23   ProcessPixel(r, c, 256  , 1, rccode, chains, it);
-#define ACTION_24   ProcessPixel(r, c, 257  , 1, rccode, chains, it);
-#define ACTION_25   ProcessPixel(r, c, 292  , 2, rccode, chains, it);
-#define ACTION_26   ProcessPixel(r, c, 293  , 2, rccode, chains, it);
-#define ACTION_27   ProcessPixel(r, c, 308  , 3, rccode, chains, it);
-#define ACTION_28   ProcessPixel(r, c, 309  , 3, rccode, chains, it);
-#define ACTION_29   ProcessPixel(r, c, 512  , 1, rccode, chains, it);
-#define ACTION_30   ProcessPixel(r, c, 513  , 1, rccode, chains, it);
-#define ACTION_31   ProcessPixel(r, c, 528  , 2, rccode, chains, it);
-#define ACTION_32   ProcessPixel(r, c, 529  , 2, rccode, chains, it);
-#define ACTION_33   ProcessPixel(r, c, 536  , 2, rccode, chains, it);
-#define ACTION_34   ProcessPixel(r, c, 576  , 2, rccode, chains, it);
-#define ACTION_35   ProcessPixel(r, c, 577  , 2, rccode, chains, it);
-#define ACTION_36   ProcessPixel(r, c, 584  , 2, rccode, chains, it);
-#define ACTION_37   ProcessPixel(r, c, 768  , 2, rccode, chains, it);
-#define ACTION_38   ProcessPixel(r, c, 769  , 2, rccode, chains, it);
-#define ACTION_39   ProcessPixel(r, c, 776  , 2, rccode, chains, it);
-#define ACTION_40   ProcessPixel(r, c, 804  , 3, rccode, chains, it);
-#define ACTION_41   ProcessPixel(r, c, 805  , 3, rccode, chains, it);
-#define ACTION_42   ProcessPixel(r, c, 820  , 4, rccode, chains, it);
-#define ACTION_43   ProcessPixel(r, c, 821  , 4, rccode, chains, it);
-#define ACTION_44   ProcessPixel(r, c, 828  , 4, rccode, chains, it);
-#define ACTION_45   ProcessPixel(r, c, 1024 , 1, rccode, chains, it);
-#define ACTION_46   ProcessPixel(r, c, 1025 , 1, rccode, chains, it);
-#define ACTION_47   ProcessPixel(r, c, 1060 , 2, rccode, chains, it);
-#define ACTION_48   ProcessPixel(r, c, 1061 , 2, rccode, chains, it);
-#define ACTION_49   ProcessPixel(r, c, 1076 , 3, rccode, chains, it);
-#define ACTION_50   ProcessPixel(r, c, 1077 , 3, rccode, chains, it);
-#define ACTION_51   ProcessPixel(r, c, 2048 , 1, rccode, chains, it);
-#define ACTION_52   ProcessPixel(r, c, 2064 , 2, rccode, chains, it);
-#define ACTION_53   ProcessPixel(r, c, 2072 , 2, rccode, chains, it);
-#define ACTION_54   ProcessPixel(r, c, 2112 , 2, rccode, chains, it);
-#define ACTION_55   ProcessPixel(r, c, 2120 , 2, rccode, chains, it);
-#define ACTION_56   ProcessPixel(r, c, 2304 , 2, rccode, chains, it);
-#define ACTION_57   ProcessPixel(r, c, 2312 , 2, rccode, chains, it);
-#define ACTION_58   ProcessPixel(r, c, 2340 , 3, rccode, chains, it);
-#define ACTION_59   ProcessPixel(r, c, 2356 , 4, rccode, chains, it);
-#define ACTION_60   ProcessPixel(r, c, 2364 , 4, rccode, chains, it);
-#define ACTION_61   ProcessPixel(r, c, 3072 , 2, rccode, chains, it);
-#define ACTION_62   ProcessPixel(r, c, 3080 , 2, rccode, chains, it);
-#define ACTION_63   ProcessPixel(r, c, 3108 , 3, rccode, chains, it);
-#define ACTION_64   ProcessPixel(r, c, 3124 , 4, rccode, chains, it);
-#define ACTION_65   ProcessPixel(r, c, 3132 , 4, rccode, chains, it);
+#define ACTION_1    ProcessPixel<0	 >(r, c, rccode, chains, it);
+#define ACTION_2    ProcessPixel<1	 >(r, c, rccode, chains, it);
+#define ACTION_3    ProcessPixel<2	 >(r, c, rccode, chains, it);
+#define ACTION_4    ProcessPixel<3	 >(r, c, rccode, chains, it);
+#define ACTION_5    ProcessPixel<10	 >(r, c, rccode, chains, it);
+#define ACTION_6    ProcessPixel<16	 >(r, c, rccode, chains, it);
+#define ACTION_7    ProcessPixel<17	 >(r, c, rccode, chains, it);
+#define ACTION_8    ProcessPixel<32	 >(r, c, rccode, chains, it);
+#define ACTION_9    ProcessPixel<33	 >(r, c, rccode, chains, it);
+#define ACTION_10   ProcessPixel<48	 >(r, c, rccode, chains, it);
+#define ACTION_11   ProcessPixel<49	 >(r, c, rccode, chains, it);
+#define ACTION_12   ProcessPixel<56	 >(r, c, rccode, chains, it);
+#define ACTION_13   ProcessPixel<64  >(r, c, rccode, chains, it);
+#define ACTION_14   ProcessPixel<65	 >(r, c, rccode, chains, it);
+#define ACTION_15   ProcessPixel<128 >(r, c, rccode, chains, it);
+#define ACTION_16   ProcessPixel<129 >(r, c, rccode, chains, it);
+#define ACTION_17   ProcessPixel<144 >(r, c, rccode, chains, it);
+#define ACTION_18   ProcessPixel<145 >(r, c, rccode, chains, it);
+#define ACTION_19   ProcessPixel<152 >(r, c, rccode, chains, it);
+#define ACTION_20   ProcessPixel<192 >(r, c, rccode, chains, it);
+#define ACTION_21   ProcessPixel<193 >(r, c, rccode, chains, it);
+#define ACTION_22   ProcessPixel<200 >(r, c, rccode, chains, it);
+#define ACTION_23   ProcessPixel<256 >(r, c, rccode, chains, it);
+#define ACTION_24   ProcessPixel<257 >(r, c, rccode, chains, it);
+#define ACTION_25   ProcessPixel<292 >(r, c, rccode, chains, it);
+#define ACTION_26   ProcessPixel<293 >(r, c, rccode, chains, it);
+#define ACTION_27   ProcessPixel<308 >(r, c, rccode, chains, it);
+#define ACTION_28   ProcessPixel<309 >(r, c, rccode, chains, it);
+#define ACTION_29   ProcessPixel<512 >(r, c, rccode, chains, it);
+#define ACTION_30   ProcessPixel<513 >(r, c, rccode, chains, it);
+#define ACTION_31   ProcessPixel<528 >(r, c, rccode, chains, it);
+#define ACTION_32   ProcessPixel<529 >(r, c, rccode, chains, it);
+#define ACTION_33   ProcessPixel<536 >(r, c, rccode, chains, it);
+#define ACTION_34   ProcessPixel<576 >(r, c, rccode, chains, it);
+#define ACTION_35   ProcessPixel<577 >(r, c, rccode, chains, it);
+#define ACTION_36   ProcessPixel<584 >(r, c, rccode, chains, it);
+#define ACTION_37   ProcessPixel<768 >(r, c, rccode, chains, it);
+#define ACTION_38   ProcessPixel<769 >(r, c, rccode, chains, it);
+#define ACTION_39   ProcessPixel<776 >(r, c, rccode, chains, it);
+#define ACTION_40   ProcessPixel<804 >(r, c, rccode, chains, it);
+#define ACTION_41   ProcessPixel<805 >(r, c, rccode, chains, it);
+#define ACTION_42   ProcessPixel<820 >(r, c, rccode, chains, it);
+#define ACTION_43   ProcessPixel<821 >(r, c, rccode, chains, it);
+#define ACTION_44   ProcessPixel<828 >(r, c, rccode, chains, it);
+#define ACTION_45   ProcessPixel<1024>(r, c, rccode, chains, it);
+#define ACTION_46   ProcessPixel<1025>(r, c, rccode, chains, it);
+#define ACTION_47   ProcessPixel<1060>(r, c, rccode, chains, it);
+#define ACTION_48   ProcessPixel<1061>(r, c, rccode, chains, it);
+#define ACTION_49   ProcessPixel<1076>(r, c, rccode, chains, it);
+#define ACTION_50   ProcessPixel<1077>(r, c, rccode, chains, it);
+#define ACTION_51   ProcessPixel<2048>(r, c, rccode, chains, it);
+#define ACTION_52   ProcessPixel<2064>(r, c, rccode, chains, it);
+#define ACTION_53   ProcessPixel<2072>(r, c, rccode, chains, it);
+#define ACTION_54   ProcessPixel<2112>(r, c, rccode, chains, it);
+#define ACTION_55   ProcessPixel<2120>(r, c, rccode, chains, it);
+#define ACTION_56   ProcessPixel<2304>(r, c, rccode, chains, it);
+#define ACTION_57   ProcessPixel<2312>(r, c, rccode, chains, it);
+#define ACTION_58   ProcessPixel<2340>(r, c, rccode, chains, it);
+#define ACTION_59   ProcessPixel<2356>(r, c, rccode, chains, it);
+#define ACTION_60   ProcessPixel<2364>(r, c, rccode, chains, it);
+#define ACTION_61   ProcessPixel<3072>(r, c, rccode, chains, it);
+#define ACTION_62   ProcessPixel<3080>(r, c, rccode, chains, it);
+#define ACTION_63   ProcessPixel<3108>(r, c, rccode, chains, it);
+#define ACTION_64   ProcessPixel<3124>(r, c, rccode, chains, it);
+#define ACTION_65   ProcessPixel<3132>(r, c, rccode, chains, it);
 
     int r = 0;
     int c = -1;
@@ -1219,15 +1298,29 @@ void Cederberg_DRAG::PerformChainCode() {
 
     chain_code_ = ChainCode(rccode);
 }
-/*
-// Slower than DRAG
-void Cederberg_DRAG_2::PerformChainCode() {
+
+void Cederberg_DRAG::PerformChainCodeWithSteps() {
+
+    perf_.start();
+    RCCode rccode = Cederberg_DRAG::PerformRCCode();
+    perf_.stop();
+    perf_.store(Step(StepType::ALGORITHM), perf_.last());
+
+    perf_.start();
+    Cederberg_DRAG::ConvertToChainCode(rccode);
+    perf_.stop();
+    perf_.store(Step(StepType::CONVERSION), perf_.last());
+
+}
+
+RCCode Cederberg_DRAG::PerformRCCode() {
+
+    RCCode rccode;
+
+    list<unsigned> chains;
 
     int w = img_.cols;
     int h = img_.rows;
-
-    vector<int> chains1(w * 4, -1);
-    vector<int> chains2(w * 4, -1);
 
     const unsigned char* previous_row_ptr = nullptr;
     const unsigned char* row_ptr = img_.ptr(0);
@@ -1242,6 +1335,204 @@ void Cederberg_DRAG_2::PerformChainCode() {
 #define CONDITION_F     (r + 1 < h && next_row_ptr[c - 1])             
 #define CONDITION_G     (r + 1 < h && next_row_ptr[c])                          
 #define CONDITION_H     (r + 1 < h && next_row_ptr[c + 1]) 
+
+#define ACTION_1    ProcessPixel<0	 >(r, c, rccode, chains, it);
+#define ACTION_2    ProcessPixel<1	 >(r, c, rccode, chains, it);
+#define ACTION_3    ProcessPixel<2	 >(r, c, rccode, chains, it);
+#define ACTION_4    ProcessPixel<3	 >(r, c, rccode, chains, it);
+#define ACTION_5    ProcessPixel<10	 >(r, c, rccode, chains, it);
+#define ACTION_6    ProcessPixel<16	 >(r, c, rccode, chains, it);
+#define ACTION_7    ProcessPixel<17	 >(r, c, rccode, chains, it);
+#define ACTION_8    ProcessPixel<32	 >(r, c, rccode, chains, it);
+#define ACTION_9    ProcessPixel<33	 >(r, c, rccode, chains, it);
+#define ACTION_10   ProcessPixel<48	 >(r, c, rccode, chains, it);
+#define ACTION_11   ProcessPixel<49	 >(r, c, rccode, chains, it);
+#define ACTION_12   ProcessPixel<56	 >(r, c, rccode, chains, it);
+#define ACTION_13   ProcessPixel<64  >(r, c, rccode, chains, it);
+#define ACTION_14   ProcessPixel<65	 >(r, c, rccode, chains, it);
+#define ACTION_15   ProcessPixel<128 >(r, c, rccode, chains, it);
+#define ACTION_16   ProcessPixel<129 >(r, c, rccode, chains, it);
+#define ACTION_17   ProcessPixel<144 >(r, c, rccode, chains, it);
+#define ACTION_18   ProcessPixel<145 >(r, c, rccode, chains, it);
+#define ACTION_19   ProcessPixel<152 >(r, c, rccode, chains, it);
+#define ACTION_20   ProcessPixel<192 >(r, c, rccode, chains, it);
+#define ACTION_21   ProcessPixel<193 >(r, c, rccode, chains, it);
+#define ACTION_22   ProcessPixel<200 >(r, c, rccode, chains, it);
+#define ACTION_23   ProcessPixel<256 >(r, c, rccode, chains, it);
+#define ACTION_24   ProcessPixel<257 >(r, c, rccode, chains, it);
+#define ACTION_25   ProcessPixel<292 >(r, c, rccode, chains, it);
+#define ACTION_26   ProcessPixel<293 >(r, c, rccode, chains, it);
+#define ACTION_27   ProcessPixel<308 >(r, c, rccode, chains, it);
+#define ACTION_28   ProcessPixel<309 >(r, c, rccode, chains, it);
+#define ACTION_29   ProcessPixel<512 >(r, c, rccode, chains, it);
+#define ACTION_30   ProcessPixel<513 >(r, c, rccode, chains, it);
+#define ACTION_31   ProcessPixel<528 >(r, c, rccode, chains, it);
+#define ACTION_32   ProcessPixel<529 >(r, c, rccode, chains, it);
+#define ACTION_33   ProcessPixel<536 >(r, c, rccode, chains, it);
+#define ACTION_34   ProcessPixel<576 >(r, c, rccode, chains, it);
+#define ACTION_35   ProcessPixel<577 >(r, c, rccode, chains, it);
+#define ACTION_36   ProcessPixel<584 >(r, c, rccode, chains, it);
+#define ACTION_37   ProcessPixel<768 >(r, c, rccode, chains, it);
+#define ACTION_38   ProcessPixel<769 >(r, c, rccode, chains, it);
+#define ACTION_39   ProcessPixel<776 >(r, c, rccode, chains, it);
+#define ACTION_40   ProcessPixel<804 >(r, c, rccode, chains, it);
+#define ACTION_41   ProcessPixel<805 >(r, c, rccode, chains, it);
+#define ACTION_42   ProcessPixel<820 >(r, c, rccode, chains, it);
+#define ACTION_43   ProcessPixel<821 >(r, c, rccode, chains, it);
+#define ACTION_44   ProcessPixel<828 >(r, c, rccode, chains, it);
+#define ACTION_45   ProcessPixel<1024>(r, c, rccode, chains, it);
+#define ACTION_46   ProcessPixel<1025>(r, c, rccode, chains, it);
+#define ACTION_47   ProcessPixel<1060>(r, c, rccode, chains, it);
+#define ACTION_48   ProcessPixel<1061>(r, c, rccode, chains, it);
+#define ACTION_49   ProcessPixel<1076>(r, c, rccode, chains, it);
+#define ACTION_50   ProcessPixel<1077>(r, c, rccode, chains, it);
+#define ACTION_51   ProcessPixel<2048>(r, c, rccode, chains, it);
+#define ACTION_52   ProcessPixel<2064>(r, c, rccode, chains, it);
+#define ACTION_53   ProcessPixel<2072>(r, c, rccode, chains, it);
+#define ACTION_54   ProcessPixel<2112>(r, c, rccode, chains, it);
+#define ACTION_55   ProcessPixel<2120>(r, c, rccode, chains, it);
+#define ACTION_56   ProcessPixel<2304>(r, c, rccode, chains, it);
+#define ACTION_57   ProcessPixel<2312>(r, c, rccode, chains, it);
+#define ACTION_58   ProcessPixel<2340>(r, c, rccode, chains, it);
+#define ACTION_59   ProcessPixel<2356>(r, c, rccode, chains, it);
+#define ACTION_60   ProcessPixel<2364>(r, c, rccode, chains, it);
+#define ACTION_61   ProcessPixel<3072>(r, c, rccode, chains, it);
+#define ACTION_62   ProcessPixel<3080>(r, c, rccode, chains, it);
+#define ACTION_63   ProcessPixel<3108>(r, c, rccode, chains, it);
+#define ACTION_64   ProcessPixel<3124>(r, c, rccode, chains, it);
+#define ACTION_65   ProcessPixel<3132>(r, c, rccode, chains, it);
+
+    int r = 0;
+    int c = -1;
+
+    list<unsigned>::iterator& it = chains.begin();
+
+    goto tree_0;
+
+#include "cederberg_forest_first_line.inc"    
+
+    // Build Raster Scan Chain Code
+    for (r = 1; r < h; r++) {
+
+        previous_row_ptr = row_ptr;
+        row_ptr = next_row_ptr;
+        next_row_ptr += img_.step[0];
+
+        it = chains.begin();
+
+        c = -1;
+        goto tree_5;
+
+#include "cederberg_forest.inc"
+
+#undef ACTION_1 
+#undef ACTION_2 
+#undef ACTION_3 
+#undef ACTION_4 
+#undef ACTION_5 
+#undef ACTION_6 
+#undef ACTION_7 
+#undef ACTION_8 
+#undef ACTION_9 
+#undef ACTION_10
+#undef ACTION_11
+#undef ACTION_12
+#undef ACTION_13
+#undef ACTION_14
+#undef ACTION_15
+#undef ACTION_16
+#undef ACTION_17
+#undef ACTION_18
+#undef ACTION_19
+#undef ACTION_20
+#undef ACTION_21
+#undef ACTION_22
+#undef ACTION_23
+#undef ACTION_24
+#undef ACTION_25
+#undef ACTION_26
+#undef ACTION_27
+#undef ACTION_28
+#undef ACTION_29
+#undef ACTION_30
+#undef ACTION_31
+#undef ACTION_32
+#undef ACTION_33
+#undef ACTION_34
+#undef ACTION_35
+#undef ACTION_36
+#undef ACTION_37
+#undef ACTION_38
+#undef ACTION_39
+#undef ACTION_40
+#undef ACTION_41
+#undef ACTION_42
+#undef ACTION_43
+#undef ACTION_44
+#undef ACTION_45
+#undef ACTION_46
+#undef ACTION_47
+#undef ACTION_48
+#undef ACTION_49
+#undef ACTION_50
+#undef ACTION_51
+#undef ACTION_52
+#undef ACTION_53
+#undef ACTION_54
+#undef ACTION_55
+#undef ACTION_56
+#undef ACTION_57
+#undef ACTION_58
+#undef ACTION_59
+#undef ACTION_60
+#undef ACTION_61
+#undef ACTION_62
+#undef ACTION_63
+#undef ACTION_64
+#undef ACTION_65
+
+#undef CONDITION_A
+#undef CONDITION_B
+#undef CONDITION_C
+#undef CONDITION_D
+#undef CONDITION_X
+#undef CONDITION_E
+#undef CONDITION_F
+#undef CONDITION_G
+#undef CONDITION_H
+
+    }
+
+    return rccode;
+}
+
+void Cederberg_DRAG::ConvertToChainCode(const RCCode& rccode) {
+    chain_code_ = ChainCode(rccode);
+}
+
+/*
+// Slower than DRAG
+void Cederberg_DRAG_2::PerformChainCode() {
+
+    int w = img_.cols;
+    int h = img_.rows;
+
+    vector<int> chains1(w * 4, -1);
+    vector<int> chains2(w * 4, -1);
+
+    const unsigned char* previous_row_ptr = nullptr;
+    const unsigned char* row_ptr = img_.ptr(0);
+    const unsigned char* next_row_ptr = row_ptr + img_.step[0];
+
+#define CONDITION_A     (previous_row_ptr[c - 1])
+#define CONDITION_B     (previous_row_ptr[c])
+#define CONDITION_C     (previous_row_ptr[c + 1])
+#define CONDITION_D     (row_ptr[c - 1])
+#define CONDITION_X     (row_ptr[c])
+#define CONDITION_E     (row_ptr[c + 1])
+#define CONDITION_F     (r + 1 < h && next_row_ptr[c - 1])
+#define CONDITION_G     (r + 1 < h && next_row_ptr[c])
+#define CONDITION_H     (r + 1 < h && next_row_ptr[c + 1])
 
 #define ACTION_1    ProcessPixel_2(r, c, 0	, rccode, chains1, chains2, it);
 #define ACTION_2    ProcessPixel_2(r, c, 1	, rccode, chains1, chains2, it);
@@ -1316,7 +1607,7 @@ void Cederberg_DRAG_2::PerformChainCode() {
 
     goto tree_0;
 
-#include "cederberg_forest_first_line.inc"    
+#include "cederberg_forest_first_line.inc"
 
     // Build Raster Scan Chain Code
     for (r = 1; r < h; r++) {
@@ -1334,15 +1625,15 @@ void Cederberg_DRAG_2::PerformChainCode() {
 
 #include "cederberg_forest.inc"
 
-#undef ACTION_1 
-#undef ACTION_2 
-#undef ACTION_3 
-#undef ACTION_4 
-#undef ACTION_5 
-#undef ACTION_6 
-#undef ACTION_7 
-#undef ACTION_8 
-#undef ACTION_9 
+#undef ACTION_1
+#undef ACTION_2
+#undef ACTION_3
+#undef ACTION_4
+#undef ACTION_5
+#undef ACTION_6
+#undef ACTION_7
+#undef ACTION_8
+#undef ACTION_9
 #undef ACTION_10
 #undef ACTION_11
 #undef ACTION_12

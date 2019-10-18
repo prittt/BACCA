@@ -5,48 +5,44 @@
 
 class Cederberg : public ChainCodeAlg {
 
-    RCCode rccode;
-
 public:
     virtual void PerformChainCode();
 
     virtual void FreeChainCodeData() {
         ChainCodeAlg::FreeChainCodeData();
-        rccode.Clean();
     }
 };
 
 class Cederberg_LUT : public ChainCodeAlg {
 
-    RCCode rccode;
-
 public:
     virtual void PerformChainCode();
 
     virtual void FreeChainCodeData() {
         ChainCodeAlg::FreeChainCodeData();
-        rccode.Clean();
     }
 };
 
 class Cederberg_LUT_PRED : public ChainCodeAlg {
 
-    RCCode rccode;
-
 public:
     virtual void PerformChainCode();
 
     virtual void FreeChainCodeData() {
         ChainCodeAlg::FreeChainCodeData();
-        rccode.Clean();
     }
 };
 
 class Cederberg_DRAG : public ChainCodeAlg {
-public:
+private:
+
+    RCCode PerformRCCode();
+    void ConvertToChainCode(const RCCode& rccode);
 
 public:
-    virtual void PerformChainCode();
+    virtual void PerformChainCode() override;
+    
+    virtual void PerformChainCodeWithSteps() override;
 
     virtual void FreeChainCodeData() {
         ChainCodeAlg::FreeChainCodeData();

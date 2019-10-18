@@ -78,9 +78,8 @@ private:
 };
 
 enum StepType {
-    ALLOC_DEALLOC = 0,
-    THINNING = 1,
-
+    ALGORITHM = 0,
+    CONVERSION = 1,
     ST_SIZE = 2,
 };
 

@@ -63,7 +63,7 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool c
                         link = (8 - diff.y) % 8;
                     }
 
-                    chain.vals.push_back(link);
+                    chain.push_back(link);
 
                     prev = cur;
 
@@ -86,7 +86,7 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool c
                         link = (8 - diff.y) % 8;
                     }
 
-                    chain.vals.push_back(link);
+                    chain.push_back(link);
 
                     prev = cur;
 
@@ -102,7 +102,7 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool c
 bool ChainCode::Chain::operator==(const Chain& rhs) const {
     return row == rhs.row &&
         col == rhs.col &&
-        vals == rhs.vals;
+        internal_values == rhs.internal_values;
 }
 
 bool ChainCode::Chain::operator<(const Chain& rhs) const {
@@ -112,11 +112,11 @@ bool ChainCode::Chain::operator<(const Chain& rhs) const {
     else if (col != rhs.col) {
         return col < rhs.col;
     }
-    else if (vals.size() != rhs.vals.size()) {
-        return vals.size() < rhs.vals.size();
+    else if (value_count != rhs.value_count) {
+        return value_count < rhs.value_count;
     }
     else {
-        return vals[0] < rhs.vals[0];
+        return get_value(0) < rhs.get_value(0);
     }
 }
 
@@ -131,7 +131,7 @@ void ChainCode::Chain::AddRightChain(const RCCode::Elem::Chain& chain) {
         else {
             new_val = 8 - val;
         }
-        vals.push_back(new_val);
+        push_back(new_val);
     }
 
 }
@@ -140,7 +140,7 @@ void ChainCode::Chain::AddLeftChain(const RCCode::Elem::Chain& chain) {
 
     for (int i = chain.value_count - 1; i >= 0; i--) {
         uint8_t val = 4 - chain.get_value(i);
-        vals.push_back(val);
+        push_back(val);
     }
 }
 

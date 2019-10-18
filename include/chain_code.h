@@ -34,26 +34,34 @@
 
 #include <opencv2/imgproc.hpp>
 
+#define PREALLOC_ELEMS 5000
+//#define PREALLOC_INTS 3
 
 struct RCCode {
+    int value_count = 0;
+    RCCode () {
+        //data.resize(PREALLOC_ELEMS);
+    }
 
     struct Elem  {
 
         struct Chain {
         private:
             std::vector<uint32_t> internal_values;
-            unsigned elem; // index of the corresponding elem in vector
+            //unsigned elem; // index of the corresponding elem in vector
         public:
             size_t value_count = 0;
 
-            Chain() {}
-            Chain(unsigned elem_) : elem(elem_) {}
+            Chain() {
+                //internal_values.resize(PREALLOC_INTS);
+            }
+           // Chain(unsigned elem_) : elem(elem_) {}
             void push_back(uint8_t val) {
-                if (value_count % 16 == 0) {
+                if ((value_count & 15) == 0 /*&& value_count / 16 >= PREALLOC_INTS*/) {
                     internal_values.push_back(0);
                 }
 
-                internal_values[internal_values.size() - 1] |= ((val & 3) << ((value_count % 16) * 2));
+                internal_values[value_count / 16] |= ((val & 3) << ((value_count & 15) << 1));
                 value_count++;
             }
             const uint8_t get_value(unsigned index) const {
@@ -72,7 +80,7 @@ struct RCCode {
         unsigned next; // vector index of the elem whose left chain is linked to this elem right chain
 
         Elem() {}
-        Elem(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(elem_), right(elem_), next(elem_) {}
+        Elem(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(), right(), next(elem_) {}
 
         Chain& operator[](bool right_) {
             if (right_) return right;
@@ -87,10 +95,21 @@ struct RCCode {
     std::vector<Elem> data;
 
     void AddElem(unsigned r_, unsigned c_) {
-        data.emplace_back(r_, c_, data.size());
+        /*if (value_count < PREALLOC_ELEMS) {
+            // unsigned r_, unsigned c_, unsigned elem_
+            data[value_count].row = r_;
+            data[value_count].col = c_;
+            data[value_count].next = value_count;
+        }
+        else {*/
+            data.emplace_back(r_, c_, data.size());
+        /*}*/
+        value_count++;
     }
 
-    size_t Size() const { return data.size(); }
+    size_t Size() const { 
+        return value_count;
+    }
 
     Elem& operator[](unsigned pos) { return data[pos]; }
     const Elem& operator[](unsigned pos) const { return data[pos]; }
@@ -107,7 +126,7 @@ struct ChainCode {
     struct Chain {
 
         unsigned row, col;
-        std::vector<uint8_t> vals;
+        std::vector<uint32_t> internal_values;
 
         Chain() {}
         Chain(unsigned row_, unsigned col_) : row(row_), col(col_) {}
@@ -116,9 +135,24 @@ struct ChainCode {
         bool operator<(const Chain& rhs) const;
         void AddRightChain(const RCCode::Elem::Chain& chain);
         void AddLeftChain(const RCCode::Elem::Chain& chain);
-        const uint8_t& operator[](size_t pos) const { return vals[pos]; }
-        std::vector<uint8_t>::const_iterator begin() const { return vals.begin(); }
-        std::vector<uint8_t>::const_iterator end() const { return vals.end(); }
+        //const uint8_t& operator[](size_t pos) const { return vals[pos]; }
+        //std::vector<uint8_t>::const_iterator begin() const { return vals.begin(); }
+        //std::vector<uint8_t>::const_iterator end() const { return vals.end(); }
+
+        size_t value_count = 0;
+
+        void push_back(uint8_t val) {
+            if (value_count % 8 == 0) {
+                internal_values.push_back(0);
+            }
+
+            internal_values[internal_values.size() - 1] |= ((val & 15) << ((value_count % 8) * 4));
+            value_count++;
+        }
+        const uint8_t get_value(unsigned index) const {
+            int internal_index = index / 8;
+            return (internal_values[internal_index] >> ((index % 8) * 4)) & 15;
+        }
 
     };
 

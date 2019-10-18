@@ -688,7 +688,7 @@ void ThebeTests::AverageTestWithSteps()
             script_os << "set boxwidth 0.6" << '\n' << '\n';
 
             script_os << "# Get stats to set labels" << '\n';
-            script_os << "stats \"" << output_average_results_rounded << "\" using 6 nooutput" << '\n';
+            script_os << "stats \"" << output_average_results_rounded << "\" using 4 nooutput" << '\n';
             script_os << "ymax = STATS_max + (STATS_max/100)*10" << '\n';
             script_os << "xw = 0" << '\n';
             script_os << "yw = (ymax)/22.0" << '\n' << '\n';
