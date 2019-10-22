@@ -56,7 +56,7 @@ struct RCCode {
                 //internal_values.resize(PREALLOC_INTS);
             }
            // Chain(unsigned elem_) : elem(elem_) {}
-            void push_back(uint8_t val) {
+            inline void push_back(uint8_t val) {
                 if ((value_count & 15) == 0 /*&& value_count / 16 >= PREALLOC_INTS*/) {
                     internal_values.push_back(0);
                 }
@@ -64,7 +64,7 @@ struct RCCode {
                 internal_values[value_count / 16] |= ((val & 3) << ((value_count & 15) << 1));
                 value_count++;
             }
-            const uint8_t get_value(unsigned index) const {
+            inline const uint8_t get_value(unsigned index) const {
                 int internal_index = index / 16;
                 return (internal_values[internal_index] >> ((index % 16) * 2)) & 3;
             }
@@ -82,14 +82,14 @@ struct RCCode {
         Elem() {}
         Elem(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(), right(), next(elem_) {}
 
-        Chain& operator[](bool right_) {
-            if (right_) return right;
-            else return left;
-        }
-        const Chain& operator[](bool right_) const {
-            if (right_) return right;
-            else return left;
-        }
+        //Chain& operator[](bool right_) {
+        //    if (right_) return right;
+        //    else return left;
+        //}
+        //const Chain& operator[](bool right_) const {
+        //    if (right_) return right;
+        //    else return left;
+        //}
     };
 
     std::vector<Elem> data;

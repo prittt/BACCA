@@ -1,4 +1,4 @@
-static void (*table[512]) (int r, int c, RCCode & rccode, vector<unsigned> & chains, vector<unsigned>::iterator & it) = {
+static unsigned int (*table[512]) (int, int, RCCode &, vector<unsigned> &, unsigned int) = {
     ProcessPixel<0>,
     ProcessPixel<0>,
     ProcessPixel<0>,
