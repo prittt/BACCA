@@ -49,4 +49,36 @@ public:
     }
 };
 
+
+class Cederberg_Tree : public ChainCodeAlg {
+public:
+	virtual void PerformChainCode() override;
+	
+	virtual void FreeChainCodeData() {
+		ChainCodeAlg::FreeChainCodeData();
+	}
+};
+
+
+
+class Cederberg_Spaghetti : public ChainCodeAlg {
+public:
+	virtual void PerformChainCode() override;
+
+	virtual void FreeChainCodeData() {
+		ChainCodeAlg::FreeChainCodeData();
+	}
+};
+
+
+class Cederberg_Spaghetti_FREQ : public ChainCodeAlg {
+public:
+	virtual void PerformChainCode() override;
+
+	virtual void FreeChainCodeData() {
+		ChainCodeAlg::FreeChainCodeData();
+	}
+};
+
+
 #endif // BACCA_CHAINCODE_CEDERBERG_H_
