@@ -28,12 +28,15 @@
 
 #include "chain_code.h"
 
-ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool contrary) {
-    for (const std::vector<cv::Point>& contour : contours) {
+using namespace std;
+using namespace cv;
+
+ChainCode::ChainCode(const vector<vector<Point>>& contours, bool contrary) {
+    for (const vector<Point>& contour : contours) {
 
         // Find top-left value
         int top = 0;
-        cv::Point max = contour.front();
+        Point max = contour.front();
         for (unsigned int i = 1; i < contour.size(); i++) {
             if (contour[i].y < max.y || (contour[i].y == max.y && contour[i].x < max.x)) {
                 max = contour[i];
@@ -41,16 +44,18 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool c
             }
         }
 
-        Chain chain(max.y, max.x);
-        cv::Point prev = max;
+        chains.emplace_back(max.y, max.x);
+        Chain& chain = chains.back();
+
+        Point prev = max;
 
         if (contour.size() > 1) {
 
             if (contrary) {
                 for (int i = top - 1 + contour.size(); i >= top; i--) { // OpenCV order is reversed
 
-                    cv::Point cur = contour[i % contour.size()];
-                    cv::Point diff = cur - prev;
+                    Point cur = contour[i % contour.size()];
+                    Point diff = cur - prev;
 
                     int link;
                     if (diff.x == -1) {
@@ -72,8 +77,8 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool c
             else {
                 for (int i = top + 1; i <= top + contour.size(); i++) {
 
-                    cv::Point cur = contour[i % contour.size()];
-                    cv::Point diff = cur - prev;
+                    Point cur = contour[i % contour.size()];
+                    Point diff = cur - prev;
 
                     int link;
                     if (diff.x == -1) {
@@ -95,7 +100,6 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool c
 
         }
 
-        chains.push_back(chain);
     }
 }
 
@@ -123,15 +127,7 @@ bool ChainCode::Chain::operator<(const Chain& rhs) const {
 void ChainCode::Chain::AddRightChain(const RCCode::Elem::Chain& chain) {
 
     for (unsigned i = 0; i < chain.value_count; i++) {
-        uint8_t val = chain.get_value(i);
-        uint8_t new_val;
-        if (val == 0) {
-            new_val = 0;
-        }
-        else {
-            new_val = 8 - val;
-        }
-        push_back(new_val);
+        push_back((8 - chain.get_value(i)) & 7);
     }
 
 }
@@ -139,14 +135,14 @@ void ChainCode::Chain::AddRightChain(const RCCode::Elem::Chain& chain) {
 void ChainCode::Chain::AddLeftChain(const RCCode::Elem::Chain& chain) {
 
     for (int i = chain.value_count - 1; i >= 0; i--) {
-        uint8_t val = 4 - chain.get_value(i);
-        push_back(val);
+        push_back(4 - chain.get_value(i));
     }
 }
 
-void ChainCode::AddChain(const RCCode& rccode, std::vector<bool>& used_elems, unsigned pos) {
+void ChainCode::AddChain(const RCCode& rccode, vector<bool>& used_elems, unsigned pos) {
 
-    Chain new_chain(rccode[pos].row, rccode[pos].col);
+    chains.emplace_back(rccode[pos].row, rccode[pos].col);
+    Chain& new_chain = chains.back();
 
     new_chain.AddRightChain(rccode[pos].right);
 
@@ -166,16 +162,71 @@ void ChainCode::AddChain(const RCCode& rccode, std::vector<bool>& used_elems, un
         used_elems[pos] = true;
     }
 
-    chains.push_back(new_chain);
 }
 
 ChainCode::ChainCode(const RCCode& rccode) {
-    std::vector<bool> used_elems;
-    used_elems.resize(rccode.Size(), false);
+    vector<bool> used_elems(rccode.Size(), false);
 
     for (unsigned i = 0; i < rccode.Size(); i++) {
         if (!used_elems[i]) {
             AddChain(rccode, used_elems, i);
         }
     }
+}
+
+
+
+vector<vector<Point>> RCCode::ToContours() {
+
+    vector<vector<Point>> contours;
+
+    int pos = 0;
+
+    while (true) {
+        for (; pos < data.size() && data[pos].next == -1; pos++);
+        if (pos == data.size())
+            break;
+
+        contours.emplace_back();
+        vector<Point>& contour = contours.back();
+        int x = data[pos].col;
+        int y = data[pos].row;
+
+        int lpos = pos;
+        while (data[lpos].next != -1) {
+
+            const int next_lpos = data[lpos].next;
+            data[lpos].next = -1;
+
+            // Right chain
+            for (int i = 0; i < data[lpos].right.value_count; i++) {
+                contour.emplace_back(x, y);
+                switch (data[lpos].right.get_value(i)) {
+                case 0: x++;            break;
+                case 1: x++;    y++;    break;
+                case 2:         y++;    break;
+                case 3: x--;    y++;    break;
+                default:                break;
+                }
+            }
+
+            // Next elem
+            lpos = next_lpos;
+
+            // Left chain
+            for (int i = data[lpos].left.value_count - 1; i >= 0; i--) {
+                contour.emplace_back(x, y);
+                switch (data[lpos].left.get_value(i)) {
+                case 0: x--;            break;
+                case 1: x--;    y--;    break;
+                case 2:         y--;    break;
+                case 3: x++;    y--;    break;
+                default:                break;
+                }
+            }
+
+        }
+    }
+
+    return contours;
 }

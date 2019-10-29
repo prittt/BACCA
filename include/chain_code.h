@@ -77,10 +77,10 @@ struct RCCode {
         unsigned row, col;
         Chain left;
         Chain right;
-        unsigned next; // vector index of the elem whose left chain is linked to this elem right chain
+        int next; // vector index of the elem whose left chain is linked to this elem right chain
 
         Elem() {}
-        Elem(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(), right(), next(elem_) {}
+        Elem(unsigned r_, unsigned c_, int next_) : row(r_), col(c_), left(), right(), next(next_) {}
 
         //Chain& operator[](bool right_) {
         //    if (right_) return right;
@@ -119,6 +119,8 @@ struct RCCode {
         //data.resize(0);
         //data.shrink_to_fit();
     }
+
+    std::vector<std::vector<cv::Point>> ToContours();
 };
 
 struct ChainCode {

@@ -7,9 +7,9 @@ using namespace std;
 using namespace cv;
 
 void ChainCodeCorrect::PerformChainCode() {
-    vector<vector<Point>> cv_contours;
-    findContours(img_, cv_contours, RETR_LIST, CHAIN_APPROX_NONE);
-    chain_code_ = ChainCode(cv_contours, true);
+    vector<vector<Point>> contours_;
+    findContours(img_, contours_, RETR_LIST, CHAIN_APPROX_NONE);
+    chain_code_ = ChainCode(contours_, true);
 }
 
 vector<vector<Point>> ChainCodeCorrect::FindContours() {
