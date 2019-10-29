@@ -1160,8 +1160,6 @@ void Cederberg_DRAG::ConvertToChainCode(const RCCode& rccode) {
     chain_code_ = ChainCode(rccode);
 }
 
-// Cederberg_Spaghetti, Cederberg_Spaghetti_FREQ
-
 void Cederberg_Spaghetti::PerformChainCode() {
 
 	RCCode rccode;
@@ -1181,9 +1179,9 @@ void Cederberg_Spaghetti::PerformChainCode() {
 #define CONDITION_D     (row_ptr[c - 1])                                       
 #define CONDITION_X     (row_ptr[c])                                                    
 #define CONDITION_E     (row_ptr[c + 1])                           
-#define CONDITION_F     (r + 1 < h && next_row_ptr[c - 1])             
-#define CONDITION_G     (r + 1 < h && next_row_ptr[c])                          
-#define CONDITION_H     (r + 1 < h && next_row_ptr[c + 1]) 
+#define CONDITION_F     (next_row_ptr[c - 1])             
+#define CONDITION_G     (next_row_ptr[c])                          
+#define CONDITION_H     (next_row_ptr[c + 1]) 
 
 #define ACTION_1    pos = ProcessPixel<0	  >(r, c, rccode, chains, pos);
 #define ACTION_2    pos = ProcessPixel<1	  >(r, c, rccode, chains, pos);
@@ -1251,17 +1249,43 @@ void Cederberg_Spaghetti::PerformChainCode() {
 #define ACTION_64   pos = ProcessPixel<3124>(r, c, rccode, chains, pos);
 #define ACTION_65   pos = ProcessPixel<3132>(r, c, rccode, chains, pos);
 
-	int r = 0;
-	int c = -1;
+	if (h == 1) {
+		int r = 0;
+		int c = -1;
 
-	unsigned int pos = 0;
+		unsigned int pos = 0;
 
-	goto fl_tree_0;
+		c = -1;
+		goto sl_tree_0;
+
+#include "Cederberg_Spaghetti_single_line_forest_code.inc.h"
+
+	}
+	else {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		goto fl_tree_0;
 
 #include "Cederberg_Spaghetti_first_line_forest_code.inc.h"    
 
-	// Build Raster Scan Chain Code
-	for (r = 1; r < h - 1; r++) {
+		// Build Raster Scan Chain Code
+		for (r = 1; r < h - 1; r++) {
+
+			previous_row_ptr = row_ptr;
+			row_ptr = next_row_ptr;
+			next_row_ptr += img_.step[0];
+
+			pos = 0;
+
+			c = -1;
+			goto cl_tree_0;
+
+#include "Cederberg_Spaghetti_center_line_forest_code.inc.h"
+
+		}
 
 		previous_row_ptr = row_ptr;
 		row_ptr = next_row_ptr;
@@ -1270,22 +1294,1088 @@ void Cederberg_Spaghetti::PerformChainCode() {
 		pos = 0;
 
 		c = -1;
-		goto cl_tree_5;
+		goto ll_tree_0;
 
-#include "Cederberg_Spaghetti_center_line_forest_code.inc.h"
+#include "Cederberg_Spaghetti_last_line_forest_code.inc.h"
 
 	}
 
-	previous_row_ptr = row_ptr;
-	row_ptr = next_row_ptr;
-	next_row_ptr += img_.step[0];
+	
 
-	pos = 0;
+#undef ACTION_1 
+#undef ACTION_2 
+#undef ACTION_3 
+#undef ACTION_4 
+#undef ACTION_5 
+#undef ACTION_6 
+#undef ACTION_7 
+#undef ACTION_8 
+#undef ACTION_9 
+#undef ACTION_10
+#undef ACTION_11
+#undef ACTION_12
+#undef ACTION_13
+#undef ACTION_14
+#undef ACTION_15
+#undef ACTION_16
+#undef ACTION_17
+#undef ACTION_18
+#undef ACTION_19
+#undef ACTION_20
+#undef ACTION_21
+#undef ACTION_22
+#undef ACTION_23
+#undef ACTION_24
+#undef ACTION_25
+#undef ACTION_26
+#undef ACTION_27
+#undef ACTION_28
+#undef ACTION_29
+#undef ACTION_30
+#undef ACTION_31
+#undef ACTION_32
+#undef ACTION_33
+#undef ACTION_34
+#undef ACTION_35
+#undef ACTION_36
+#undef ACTION_37
+#undef ACTION_38
+#undef ACTION_39
+#undef ACTION_40
+#undef ACTION_41
+#undef ACTION_42
+#undef ACTION_43
+#undef ACTION_44
+#undef ACTION_45
+#undef ACTION_46
+#undef ACTION_47
+#undef ACTION_48
+#undef ACTION_49
+#undef ACTION_50
+#undef ACTION_51
+#undef ACTION_52
+#undef ACTION_53
+#undef ACTION_54
+#undef ACTION_55
+#undef ACTION_56
+#undef ACTION_57
+#undef ACTION_58
+#undef ACTION_59
+#undef ACTION_60
+#undef ACTION_61
+#undef ACTION_62
+#undef ACTION_63
+#undef ACTION_64
+#undef ACTION_65
 
-	c = -1;
-	goto ll_tree_0;
+#undef CONDITION_A
+#undef CONDITION_B
+#undef CONDITION_C
+#undef CONDITION_D
+#undef CONDITION_X
+#undef CONDITION_E
+#undef CONDITION_F
+#undef CONDITION_G
+#undef CONDITION_H
 
-#include "Cederberg_Spaghetti_last_line_forest_code.inc.h"
+
+	chain_code_ = ChainCode(rccode);
+}
+
+
+void Cederberg_Spaghetti_FREQ::PerformChainCode() {
+
+	RCCode rccode;
+
+	int w = img_.cols;
+	int h = img_.rows;
+
+	vector<unsigned> chains;
+
+	const unsigned char* previous_row_ptr = nullptr;
+	const unsigned char* row_ptr = img_.ptr(0);
+	const unsigned char* next_row_ptr = row_ptr + img_.step[0];
+
+#define CONDITION_A     (previous_row_ptr[c - 1])                     
+#define CONDITION_B     (previous_row_ptr[c])                                  
+#define CONDITION_C     (previous_row_ptr[c + 1])         
+#define CONDITION_D     (row_ptr[c - 1])                                       
+#define CONDITION_X     (row_ptr[c])                                                    
+#define CONDITION_E     (row_ptr[c + 1])                           
+#define CONDITION_F     (next_row_ptr[c - 1])             
+#define CONDITION_G     (next_row_ptr[c])                          
+#define CONDITION_H     (next_row_ptr[c + 1]) 
+
+#define ACTION_1    pos = ProcessPixel<0	  >(r, c, rccode, chains, pos);
+#define ACTION_2    pos = ProcessPixel<1	  >(r, c, rccode, chains, pos);
+#define ACTION_3    pos = ProcessPixel<2	  >(r, c, rccode, chains, pos);
+#define ACTION_4    pos = ProcessPixel<3	  >(r, c, rccode, chains, pos);
+#define ACTION_5    pos = ProcessPixel<10  >(r, c, rccode, chains, pos);
+#define ACTION_6    pos = ProcessPixel<16  >(r, c, rccode, chains, pos);
+#define ACTION_7    pos = ProcessPixel<17  >(r, c, rccode, chains, pos);
+#define ACTION_8    pos = ProcessPixel<32  >(r, c, rccode, chains, pos);
+#define ACTION_9    pos = ProcessPixel<33  >(r, c, rccode, chains, pos);
+#define ACTION_10   pos = ProcessPixel<48  >(r, c, rccode, chains, pos);
+#define ACTION_11   pos = ProcessPixel<49  >(r, c, rccode, chains, pos);
+#define ACTION_12   pos = ProcessPixel<56  >(r, c, rccode, chains, pos);
+#define ACTION_13   pos = ProcessPixel<64  >(r, c, rccode, chains, pos);
+#define ACTION_14   pos = ProcessPixel<65  >(r, c, rccode, chains, pos);
+#define ACTION_15   pos = ProcessPixel<128 >(r, c, rccode, chains, pos);
+#define ACTION_16   pos = ProcessPixel<129 >(r, c, rccode, chains, pos);
+#define ACTION_17   pos = ProcessPixel<144 >(r, c, rccode, chains, pos);
+#define ACTION_18   pos = ProcessPixel<145 >(r, c, rccode, chains, pos);
+#define ACTION_19   pos = ProcessPixel<152 >(r, c, rccode, chains, pos);
+#define ACTION_20   pos = ProcessPixel<192 >(r, c, rccode, chains, pos);
+#define ACTION_21   pos = ProcessPixel<193 >(r, c, rccode, chains, pos);
+#define ACTION_22   pos = ProcessPixel<200 >(r, c, rccode, chains, pos);
+#define ACTION_23   pos = ProcessPixel<256 >(r, c, rccode, chains, pos);
+#define ACTION_24   pos = ProcessPixel<257 >(r, c, rccode, chains, pos);
+#define ACTION_25   pos = ProcessPixel<292 >(r, c, rccode, chains, pos);
+#define ACTION_26   pos = ProcessPixel<293 >(r, c, rccode, chains, pos);
+#define ACTION_27   pos = ProcessPixel<308 >(r, c, rccode, chains, pos);
+#define ACTION_28   pos = ProcessPixel<309 >(r, c, rccode, chains, pos);
+#define ACTION_29   pos = ProcessPixel<512 >(r, c, rccode, chains, pos);
+#define ACTION_30   pos = ProcessPixel<513 >(r, c, rccode, chains, pos);
+#define ACTION_31   pos = ProcessPixel<528 >(r, c, rccode, chains, pos);
+#define ACTION_32   pos = ProcessPixel<529 >(r, c, rccode, chains, pos);
+#define ACTION_33   pos = ProcessPixel<536 >(r, c, rccode, chains, pos);
+#define ACTION_34   pos = ProcessPixel<576 >(r, c, rccode, chains, pos);
+#define ACTION_35   pos = ProcessPixel<577 >(r, c, rccode, chains, pos);
+#define ACTION_36   pos = ProcessPixel<584 >(r, c, rccode, chains, pos);
+#define ACTION_37   pos = ProcessPixel<768 >(r, c, rccode, chains, pos);
+#define ACTION_38   pos = ProcessPixel<769 >(r, c, rccode, chains, pos);
+#define ACTION_39   pos = ProcessPixel<776 >(r, c, rccode, chains, pos);
+#define ACTION_40   pos = ProcessPixel<804 >(r, c, rccode, chains, pos);
+#define ACTION_41   pos = ProcessPixel<805 >(r, c, rccode, chains, pos);
+#define ACTION_42   pos = ProcessPixel<820 >(r, c, rccode, chains, pos);
+#define ACTION_43   pos = ProcessPixel<821 >(r, c, rccode, chains, pos);
+#define ACTION_44   pos = ProcessPixel<828 >(r, c, rccode, chains, pos);
+#define ACTION_45   pos = ProcessPixel<1024>(r, c, rccode, chains, pos);
+#define ACTION_46   pos = ProcessPixel<1025>(r, c, rccode, chains, pos);
+#define ACTION_47   pos = ProcessPixel<1060>(r, c, rccode, chains, pos);
+#define ACTION_48   pos = ProcessPixel<1061>(r, c, rccode, chains, pos);
+#define ACTION_49   pos = ProcessPixel<1076>(r, c, rccode, chains, pos);
+#define ACTION_50   pos = ProcessPixel<1077>(r, c, rccode, chains, pos);
+#define ACTION_51   pos = ProcessPixel<2048>(r, c, rccode, chains, pos);
+#define ACTION_52   pos = ProcessPixel<2064>(r, c, rccode, chains, pos);
+#define ACTION_53   pos = ProcessPixel<2072>(r, c, rccode, chains, pos);
+#define ACTION_54   pos = ProcessPixel<2112>(r, c, rccode, chains, pos);
+#define ACTION_55   pos = ProcessPixel<2120>(r, c, rccode, chains, pos);
+#define ACTION_56   pos = ProcessPixel<2304>(r, c, rccode, chains, pos);
+#define ACTION_57   pos = ProcessPixel<2312>(r, c, rccode, chains, pos);
+#define ACTION_58   pos = ProcessPixel<2340>(r, c, rccode, chains, pos);
+#define ACTION_59   pos = ProcessPixel<2356>(r, c, rccode, chains, pos);
+#define ACTION_60   pos = ProcessPixel<2364>(r, c, rccode, chains, pos);
+#define ACTION_61   pos = ProcessPixel<3072>(r, c, rccode, chains, pos);
+#define ACTION_62   pos = ProcessPixel<3080>(r, c, rccode, chains, pos);
+#define ACTION_63   pos = ProcessPixel<3108>(r, c, rccode, chains, pos);
+#define ACTION_64   pos = ProcessPixel<3124>(r, c, rccode, chains, pos);
+#define ACTION_65   pos = ProcessPixel<3132>(r, c, rccode, chains, pos);
+
+	if (h == 1) {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		c = -1;
+		goto sl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_single_line_forest_code.inc.h"
+
+	}
+	else {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		goto fl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_first_line_forest_code.inc.h"    
+
+		// Build Raster Scan Chain Code
+		for (r = 1; r < h - 1; r++) {
+
+			previous_row_ptr = row_ptr;
+			row_ptr = next_row_ptr;
+			next_row_ptr += img_.step[0];
+
+			pos = 0;
+
+			c = -1;
+			goto cl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_center_line_forest_code.inc.h"
+
+		}
+
+		previous_row_ptr = row_ptr;
+		row_ptr = next_row_ptr;
+		next_row_ptr += img_.step[0];
+
+		pos = 0;
+
+		c = -1;
+		goto ll_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_last_line_forest_code.inc.h"
+
+	}
+
+
+
+#undef ACTION_1 
+#undef ACTION_2 
+#undef ACTION_3 
+#undef ACTION_4 
+#undef ACTION_5 
+#undef ACTION_6 
+#undef ACTION_7 
+#undef ACTION_8 
+#undef ACTION_9 
+#undef ACTION_10
+#undef ACTION_11
+#undef ACTION_12
+#undef ACTION_13
+#undef ACTION_14
+#undef ACTION_15
+#undef ACTION_16
+#undef ACTION_17
+#undef ACTION_18
+#undef ACTION_19
+#undef ACTION_20
+#undef ACTION_21
+#undef ACTION_22
+#undef ACTION_23
+#undef ACTION_24
+#undef ACTION_25
+#undef ACTION_26
+#undef ACTION_27
+#undef ACTION_28
+#undef ACTION_29
+#undef ACTION_30
+#undef ACTION_31
+#undef ACTION_32
+#undef ACTION_33
+#undef ACTION_34
+#undef ACTION_35
+#undef ACTION_36
+#undef ACTION_37
+#undef ACTION_38
+#undef ACTION_39
+#undef ACTION_40
+#undef ACTION_41
+#undef ACTION_42
+#undef ACTION_43
+#undef ACTION_44
+#undef ACTION_45
+#undef ACTION_46
+#undef ACTION_47
+#undef ACTION_48
+#undef ACTION_49
+#undef ACTION_50
+#undef ACTION_51
+#undef ACTION_52
+#undef ACTION_53
+#undef ACTION_54
+#undef ACTION_55
+#undef ACTION_56
+#undef ACTION_57
+#undef ACTION_58
+#undef ACTION_59
+#undef ACTION_60
+#undef ACTION_61
+#undef ACTION_62
+#undef ACTION_63
+#undef ACTION_64
+#undef ACTION_65
+
+#undef CONDITION_A
+#undef CONDITION_B
+#undef CONDITION_C
+#undef CONDITION_D
+#undef CONDITION_X
+#undef CONDITION_E
+#undef CONDITION_F
+#undef CONDITION_G
+#undef CONDITION_H
+
+
+	chain_code_ = ChainCode(rccode);
+}
+
+
+void Cederberg_Tree::PerformChainCode() {
+
+	RCCode rccode;
+
+	int w = img_.cols;
+	int h = img_.rows;
+
+	vector<unsigned> chains;
+
+	const unsigned char* previous_row_ptr = nullptr;
+	const unsigned char* row_ptr = img_.ptr(0);
+	const unsigned char* next_row_ptr = row_ptr + img_.step[0];
+
+#define CONDITION_A     (r > 0 && c > 0 && previous_row_ptr[c - 1])                     
+#define CONDITION_B     (r > 0 && previous_row_ptr[c])                                  
+#define CONDITION_C     (r > 0 && c + 1 < w && previous_row_ptr[c + 1])         
+#define CONDITION_D     (c > 0 && row_ptr[c - 1])                                       
+#define CONDITION_X     (row_ptr[c])                                                    
+#define CONDITION_E     (c + 1 < w && row_ptr[c + 1])                           
+#define CONDITION_F     (r + 1 < h && c > 0 && r + 1 < h && next_row_ptr[c - 1])             
+#define CONDITION_G     (r + 1 < h && next_row_ptr[c])                          
+#define CONDITION_H     (r + 1 < h && c + 1 < w && next_row_ptr[c + 1])
+
+#define ACTION_1    pos = ProcessPixel<0	  >(r, c, rccode, chains, pos);
+#define ACTION_2    pos = ProcessPixel<1	  >(r, c, rccode, chains, pos);
+#define ACTION_3    pos = ProcessPixel<2	  >(r, c, rccode, chains, pos);
+#define ACTION_4    pos = ProcessPixel<3	  >(r, c, rccode, chains, pos);
+#define ACTION_5    pos = ProcessPixel<10  >(r, c, rccode, chains, pos);
+#define ACTION_6    pos = ProcessPixel<16  >(r, c, rccode, chains, pos);
+#define ACTION_7    pos = ProcessPixel<17  >(r, c, rccode, chains, pos);
+#define ACTION_8    pos = ProcessPixel<32  >(r, c, rccode, chains, pos);
+#define ACTION_9    pos = ProcessPixel<33  >(r, c, rccode, chains, pos);
+#define ACTION_10   pos = ProcessPixel<48  >(r, c, rccode, chains, pos);
+#define ACTION_11   pos = ProcessPixel<49  >(r, c, rccode, chains, pos);
+#define ACTION_12   pos = ProcessPixel<56  >(r, c, rccode, chains, pos);
+#define ACTION_13   pos = ProcessPixel<64  >(r, c, rccode, chains, pos);
+#define ACTION_14   pos = ProcessPixel<65  >(r, c, rccode, chains, pos);
+#define ACTION_15   pos = ProcessPixel<128 >(r, c, rccode, chains, pos);
+#define ACTION_16   pos = ProcessPixel<129 >(r, c, rccode, chains, pos);
+#define ACTION_17   pos = ProcessPixel<144 >(r, c, rccode, chains, pos);
+#define ACTION_18   pos = ProcessPixel<145 >(r, c, rccode, chains, pos);
+#define ACTION_19   pos = ProcessPixel<152 >(r, c, rccode, chains, pos);
+#define ACTION_20   pos = ProcessPixel<192 >(r, c, rccode, chains, pos);
+#define ACTION_21   pos = ProcessPixel<193 >(r, c, rccode, chains, pos);
+#define ACTION_22   pos = ProcessPixel<200 >(r, c, rccode, chains, pos);
+#define ACTION_23   pos = ProcessPixel<256 >(r, c, rccode, chains, pos);
+#define ACTION_24   pos = ProcessPixel<257 >(r, c, rccode, chains, pos);
+#define ACTION_25   pos = ProcessPixel<292 >(r, c, rccode, chains, pos);
+#define ACTION_26   pos = ProcessPixel<293 >(r, c, rccode, chains, pos);
+#define ACTION_27   pos = ProcessPixel<308 >(r, c, rccode, chains, pos);
+#define ACTION_28   pos = ProcessPixel<309 >(r, c, rccode, chains, pos);
+#define ACTION_29   pos = ProcessPixel<512 >(r, c, rccode, chains, pos);
+#define ACTION_30   pos = ProcessPixel<513 >(r, c, rccode, chains, pos);
+#define ACTION_31   pos = ProcessPixel<528 >(r, c, rccode, chains, pos);
+#define ACTION_32   pos = ProcessPixel<529 >(r, c, rccode, chains, pos);
+#define ACTION_33   pos = ProcessPixel<536 >(r, c, rccode, chains, pos);
+#define ACTION_34   pos = ProcessPixel<576 >(r, c, rccode, chains, pos);
+#define ACTION_35   pos = ProcessPixel<577 >(r, c, rccode, chains, pos);
+#define ACTION_36   pos = ProcessPixel<584 >(r, c, rccode, chains, pos);
+#define ACTION_37   pos = ProcessPixel<768 >(r, c, rccode, chains, pos);
+#define ACTION_38   pos = ProcessPixel<769 >(r, c, rccode, chains, pos);
+#define ACTION_39   pos = ProcessPixel<776 >(r, c, rccode, chains, pos);
+#define ACTION_40   pos = ProcessPixel<804 >(r, c, rccode, chains, pos);
+#define ACTION_41   pos = ProcessPixel<805 >(r, c, rccode, chains, pos);
+#define ACTION_42   pos = ProcessPixel<820 >(r, c, rccode, chains, pos);
+#define ACTION_43   pos = ProcessPixel<821 >(r, c, rccode, chains, pos);
+#define ACTION_44   pos = ProcessPixel<828 >(r, c, rccode, chains, pos);
+#define ACTION_45   pos = ProcessPixel<1024>(r, c, rccode, chains, pos);
+#define ACTION_46   pos = ProcessPixel<1025>(r, c, rccode, chains, pos);
+#define ACTION_47   pos = ProcessPixel<1060>(r, c, rccode, chains, pos);
+#define ACTION_48   pos = ProcessPixel<1061>(r, c, rccode, chains, pos);
+#define ACTION_49   pos = ProcessPixel<1076>(r, c, rccode, chains, pos);
+#define ACTION_50   pos = ProcessPixel<1077>(r, c, rccode, chains, pos);
+#define ACTION_51   pos = ProcessPixel<2048>(r, c, rccode, chains, pos);
+#define ACTION_52   pos = ProcessPixel<2064>(r, c, rccode, chains, pos);
+#define ACTION_53   pos = ProcessPixel<2072>(r, c, rccode, chains, pos);
+#define ACTION_54   pos = ProcessPixel<2112>(r, c, rccode, chains, pos);
+#define ACTION_55   pos = ProcessPixel<2120>(r, c, rccode, chains, pos);
+#define ACTION_56   pos = ProcessPixel<2304>(r, c, rccode, chains, pos);
+#define ACTION_57   pos = ProcessPixel<2312>(r, c, rccode, chains, pos);
+#define ACTION_58   pos = ProcessPixel<2340>(r, c, rccode, chains, pos);
+#define ACTION_59   pos = ProcessPixel<2356>(r, c, rccode, chains, pos);
+#define ACTION_60   pos = ProcessPixel<2364>(r, c, rccode, chains, pos);
+#define ACTION_61   pos = ProcessPixel<3072>(r, c, rccode, chains, pos);
+#define ACTION_62   pos = ProcessPixel<3080>(r, c, rccode, chains, pos);
+#define ACTION_63   pos = ProcessPixel<3108>(r, c, rccode, chains, pos);
+#define ACTION_64   pos = ProcessPixel<3124>(r, c, rccode, chains, pos);
+#define ACTION_65   pos = ProcessPixel<3132>(r, c, rccode, chains, pos);
+
+
+	for (int r = 0; r < h; r++) {
+		unsigned int pos = 0;
+
+		for (int c = 0; c < w; c++) {
+#include "Cederberg_Tree_tree_code.inc.h"
+		}
+
+		previous_row_ptr = row_ptr;
+		row_ptr = next_row_ptr;
+		next_row_ptr += img_.step[0];
+	}
+
+
+#undef ACTION_1 
+#undef ACTION_2 
+#undef ACTION_3 
+#undef ACTION_4 
+#undef ACTION_5 
+#undef ACTION_6 
+#undef ACTION_7 
+#undef ACTION_8 
+#undef ACTION_9 
+#undef ACTION_10
+#undef ACTION_11
+#undef ACTION_12
+#undef ACTION_13
+#undef ACTION_14
+#undef ACTION_15
+#undef ACTION_16
+#undef ACTION_17
+#undef ACTION_18
+#undef ACTION_19
+#undef ACTION_20
+#undef ACTION_21
+#undef ACTION_22
+#undef ACTION_23
+#undef ACTION_24
+#undef ACTION_25
+#undef ACTION_26
+#undef ACTION_27
+#undef ACTION_28
+#undef ACTION_29
+#undef ACTION_30
+#undef ACTION_31
+#undef ACTION_32
+#undef ACTION_33
+#undef ACTION_34
+#undef ACTION_35
+#undef ACTION_36
+#undef ACTION_37
+#undef ACTION_38
+#undef ACTION_39
+#undef ACTION_40
+#undef ACTION_41
+#undef ACTION_42
+#undef ACTION_43
+#undef ACTION_44
+#undef ACTION_45
+#undef ACTION_46
+#undef ACTION_47
+#undef ACTION_48
+#undef ACTION_49
+#undef ACTION_50
+#undef ACTION_51
+#undef ACTION_52
+#undef ACTION_53
+#undef ACTION_54
+#undef ACTION_55
+#undef ACTION_56
+#undef ACTION_57
+#undef ACTION_58
+#undef ACTION_59
+#undef ACTION_60
+#undef ACTION_61
+#undef ACTION_62
+#undef ACTION_63
+#undef ACTION_64
+#undef ACTION_65
+
+#undef CONDITION_A
+#undef CONDITION_B
+#undef CONDITION_C
+#undef CONDITION_D
+#undef CONDITION_X
+#undef CONDITION_E
+#undef CONDITION_F
+#undef CONDITION_G
+#undef CONDITION_H
+
+
+	chain_code_ = ChainCode(rccode);
+}
+
+
+void Cederberg_Spaghetti_FREQ_without_classical::PerformChainCode() {
+
+	RCCode rccode;
+
+	int w = img_.cols;
+	int h = img_.rows;
+
+	vector<unsigned> chains;
+
+	const unsigned char* previous_row_ptr = nullptr;
+	const unsigned char* row_ptr = img_.ptr(0);
+	const unsigned char* next_row_ptr = row_ptr + img_.step[0];
+
+#define CONDITION_A     (previous_row_ptr[c - 1])                     
+#define CONDITION_B     (previous_row_ptr[c])                                  
+#define CONDITION_C     (previous_row_ptr[c + 1])         
+#define CONDITION_D     (row_ptr[c - 1])                                       
+#define CONDITION_X     (row_ptr[c])                                                    
+#define CONDITION_E     (row_ptr[c + 1])                           
+#define CONDITION_F     (next_row_ptr[c - 1])             
+#define CONDITION_G     (next_row_ptr[c])                          
+#define CONDITION_H     (next_row_ptr[c + 1]) 
+
+#define ACTION_1    pos = ProcessPixel<0	  >(r, c, rccode, chains, pos);
+#define ACTION_2    pos = ProcessPixel<1	  >(r, c, rccode, chains, pos);
+#define ACTION_3    pos = ProcessPixel<2	  >(r, c, rccode, chains, pos);
+#define ACTION_4    pos = ProcessPixel<3	  >(r, c, rccode, chains, pos);
+#define ACTION_5    pos = ProcessPixel<10  >(r, c, rccode, chains, pos);
+#define ACTION_6    pos = ProcessPixel<16  >(r, c, rccode, chains, pos);
+#define ACTION_7    pos = ProcessPixel<17  >(r, c, rccode, chains, pos);
+#define ACTION_8    pos = ProcessPixel<32  >(r, c, rccode, chains, pos);
+#define ACTION_9    pos = ProcessPixel<33  >(r, c, rccode, chains, pos);
+#define ACTION_10   pos = ProcessPixel<48  >(r, c, rccode, chains, pos);
+#define ACTION_11   pos = ProcessPixel<49  >(r, c, rccode, chains, pos);
+#define ACTION_12   pos = ProcessPixel<56  >(r, c, rccode, chains, pos);
+#define ACTION_13   pos = ProcessPixel<64  >(r, c, rccode, chains, pos);
+#define ACTION_14   pos = ProcessPixel<65  >(r, c, rccode, chains, pos);
+#define ACTION_15   pos = ProcessPixel<128 >(r, c, rccode, chains, pos);
+#define ACTION_16   pos = ProcessPixel<129 >(r, c, rccode, chains, pos);
+#define ACTION_17   pos = ProcessPixel<144 >(r, c, rccode, chains, pos);
+#define ACTION_18   pos = ProcessPixel<145 >(r, c, rccode, chains, pos);
+#define ACTION_19   pos = ProcessPixel<152 >(r, c, rccode, chains, pos);
+#define ACTION_20   pos = ProcessPixel<192 >(r, c, rccode, chains, pos);
+#define ACTION_21   pos = ProcessPixel<193 >(r, c, rccode, chains, pos);
+#define ACTION_22   pos = ProcessPixel<200 >(r, c, rccode, chains, pos);
+#define ACTION_23   pos = ProcessPixel<256 >(r, c, rccode, chains, pos);
+#define ACTION_24   pos = ProcessPixel<257 >(r, c, rccode, chains, pos);
+#define ACTION_25   pos = ProcessPixel<292 >(r, c, rccode, chains, pos);
+#define ACTION_26   pos = ProcessPixel<293 >(r, c, rccode, chains, pos);
+#define ACTION_27   pos = ProcessPixel<308 >(r, c, rccode, chains, pos);
+#define ACTION_28   pos = ProcessPixel<309 >(r, c, rccode, chains, pos);
+#define ACTION_29   pos = ProcessPixel<512 >(r, c, rccode, chains, pos);
+#define ACTION_30   pos = ProcessPixel<513 >(r, c, rccode, chains, pos);
+#define ACTION_31   pos = ProcessPixel<528 >(r, c, rccode, chains, pos);
+#define ACTION_32   pos = ProcessPixel<529 >(r, c, rccode, chains, pos);
+#define ACTION_33   pos = ProcessPixel<536 >(r, c, rccode, chains, pos);
+#define ACTION_34   pos = ProcessPixel<576 >(r, c, rccode, chains, pos);
+#define ACTION_35   pos = ProcessPixel<577 >(r, c, rccode, chains, pos);
+#define ACTION_36   pos = ProcessPixel<584 >(r, c, rccode, chains, pos);
+#define ACTION_37   pos = ProcessPixel<768 >(r, c, rccode, chains, pos);
+#define ACTION_38   pos = ProcessPixel<769 >(r, c, rccode, chains, pos);
+#define ACTION_39   pos = ProcessPixel<776 >(r, c, rccode, chains, pos);
+#define ACTION_40   pos = ProcessPixel<804 >(r, c, rccode, chains, pos);
+#define ACTION_41   pos = ProcessPixel<805 >(r, c, rccode, chains, pos);
+#define ACTION_42   pos = ProcessPixel<820 >(r, c, rccode, chains, pos);
+#define ACTION_43   pos = ProcessPixel<821 >(r, c, rccode, chains, pos);
+#define ACTION_44   pos = ProcessPixel<828 >(r, c, rccode, chains, pos);
+#define ACTION_45   pos = ProcessPixel<1024>(r, c, rccode, chains, pos);
+#define ACTION_46   pos = ProcessPixel<1025>(r, c, rccode, chains, pos);
+#define ACTION_47   pos = ProcessPixel<1060>(r, c, rccode, chains, pos);
+#define ACTION_48   pos = ProcessPixel<1061>(r, c, rccode, chains, pos);
+#define ACTION_49   pos = ProcessPixel<1076>(r, c, rccode, chains, pos);
+#define ACTION_50   pos = ProcessPixel<1077>(r, c, rccode, chains, pos);
+#define ACTION_51   pos = ProcessPixel<2048>(r, c, rccode, chains, pos);
+#define ACTION_52   pos = ProcessPixel<2064>(r, c, rccode, chains, pos);
+#define ACTION_53   pos = ProcessPixel<2072>(r, c, rccode, chains, pos);
+#define ACTION_54   pos = ProcessPixel<2112>(r, c, rccode, chains, pos);
+#define ACTION_55   pos = ProcessPixel<2120>(r, c, rccode, chains, pos);
+#define ACTION_56   pos = ProcessPixel<2304>(r, c, rccode, chains, pos);
+#define ACTION_57   pos = ProcessPixel<2312>(r, c, rccode, chains, pos);
+#define ACTION_58   pos = ProcessPixel<2340>(r, c, rccode, chains, pos);
+#define ACTION_59   pos = ProcessPixel<2356>(r, c, rccode, chains, pos);
+#define ACTION_60   pos = ProcessPixel<2364>(r, c, rccode, chains, pos);
+#define ACTION_61   pos = ProcessPixel<3072>(r, c, rccode, chains, pos);
+#define ACTION_62   pos = ProcessPixel<3080>(r, c, rccode, chains, pos);
+#define ACTION_63   pos = ProcessPixel<3108>(r, c, rccode, chains, pos);
+#define ACTION_64   pos = ProcessPixel<3124>(r, c, rccode, chains, pos);
+#define ACTION_65   pos = ProcessPixel<3132>(r, c, rccode, chains, pos);
+
+	if (h == 1) {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		c = -1;
+		goto sl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_without_classical_single_line_forest_code.inc.h"
+
+	}
+	else {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		goto fl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_without_classical_first_line_forest_code.inc.h"    
+
+		// Build Raster Scan Chain Code
+		for (r = 1; r < h - 1; r++) {
+
+			previous_row_ptr = row_ptr;
+			row_ptr = next_row_ptr;
+			next_row_ptr += img_.step[0];
+
+			pos = 0;
+
+			c = -1;
+			goto cl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_without_classical_center_line_forest_code.inc.h"
+
+		}
+
+		previous_row_ptr = row_ptr;
+		row_ptr = next_row_ptr;
+		next_row_ptr += img_.step[0];
+
+		pos = 0;
+
+		c = -1;
+		goto ll_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_without_classical_last_line_forest_code.inc.h"
+
+	}
+
+
+
+#undef ACTION_1 
+#undef ACTION_2 
+#undef ACTION_3 
+#undef ACTION_4 
+#undef ACTION_5 
+#undef ACTION_6 
+#undef ACTION_7 
+#undef ACTION_8 
+#undef ACTION_9 
+#undef ACTION_10
+#undef ACTION_11
+#undef ACTION_12
+#undef ACTION_13
+#undef ACTION_14
+#undef ACTION_15
+#undef ACTION_16
+#undef ACTION_17
+#undef ACTION_18
+#undef ACTION_19
+#undef ACTION_20
+#undef ACTION_21
+#undef ACTION_22
+#undef ACTION_23
+#undef ACTION_24
+#undef ACTION_25
+#undef ACTION_26
+#undef ACTION_27
+#undef ACTION_28
+#undef ACTION_29
+#undef ACTION_30
+#undef ACTION_31
+#undef ACTION_32
+#undef ACTION_33
+#undef ACTION_34
+#undef ACTION_35
+#undef ACTION_36
+#undef ACTION_37
+#undef ACTION_38
+#undef ACTION_39
+#undef ACTION_40
+#undef ACTION_41
+#undef ACTION_42
+#undef ACTION_43
+#undef ACTION_44
+#undef ACTION_45
+#undef ACTION_46
+#undef ACTION_47
+#undef ACTION_48
+#undef ACTION_49
+#undef ACTION_50
+#undef ACTION_51
+#undef ACTION_52
+#undef ACTION_53
+#undef ACTION_54
+#undef ACTION_55
+#undef ACTION_56
+#undef ACTION_57
+#undef ACTION_58
+#undef ACTION_59
+#undef ACTION_60
+#undef ACTION_61
+#undef ACTION_62
+#undef ACTION_63
+#undef ACTION_64
+#undef ACTION_65
+
+#undef CONDITION_A
+#undef CONDITION_B
+#undef CONDITION_C
+#undef CONDITION_D
+#undef CONDITION_X
+#undef CONDITION_E
+#undef CONDITION_F
+#undef CONDITION_G
+#undef CONDITION_H
+
+
+	chain_code_ = ChainCode(rccode);
+}
+
+
+void Cederberg_Spaghetti_FREQ_hamlet::PerformChainCode() {
+
+	RCCode rccode;
+
+	int w = img_.cols;
+	int h = img_.rows;
+
+	vector<unsigned> chains;
+
+	const unsigned char* previous_row_ptr = nullptr;
+	const unsigned char* row_ptr = img_.ptr(0);
+	const unsigned char* next_row_ptr = row_ptr + img_.step[0];
+
+#define CONDITION_A     (previous_row_ptr[c - 1])                     
+#define CONDITION_B     (previous_row_ptr[c])                                  
+#define CONDITION_C     (previous_row_ptr[c + 1])         
+#define CONDITION_D     (row_ptr[c - 1])                                       
+#define CONDITION_X     (row_ptr[c])                                                    
+#define CONDITION_E     (row_ptr[c + 1])                           
+#define CONDITION_F     (next_row_ptr[c - 1])             
+#define CONDITION_G     (next_row_ptr[c])                          
+#define CONDITION_H     (next_row_ptr[c + 1]) 
+
+#define ACTION_1    pos = ProcessPixel<0	  >(r, c, rccode, chains, pos);
+#define ACTION_2    pos = ProcessPixel<1	  >(r, c, rccode, chains, pos);
+#define ACTION_3    pos = ProcessPixel<2	  >(r, c, rccode, chains, pos);
+#define ACTION_4    pos = ProcessPixel<3	  >(r, c, rccode, chains, pos);
+#define ACTION_5    pos = ProcessPixel<10  >(r, c, rccode, chains, pos);
+#define ACTION_6    pos = ProcessPixel<16  >(r, c, rccode, chains, pos);
+#define ACTION_7    pos = ProcessPixel<17  >(r, c, rccode, chains, pos);
+#define ACTION_8    pos = ProcessPixel<32  >(r, c, rccode, chains, pos);
+#define ACTION_9    pos = ProcessPixel<33  >(r, c, rccode, chains, pos);
+#define ACTION_10   pos = ProcessPixel<48  >(r, c, rccode, chains, pos);
+#define ACTION_11   pos = ProcessPixel<49  >(r, c, rccode, chains, pos);
+#define ACTION_12   pos = ProcessPixel<56  >(r, c, rccode, chains, pos);
+#define ACTION_13   pos = ProcessPixel<64  >(r, c, rccode, chains, pos);
+#define ACTION_14   pos = ProcessPixel<65  >(r, c, rccode, chains, pos);
+#define ACTION_15   pos = ProcessPixel<128 >(r, c, rccode, chains, pos);
+#define ACTION_16   pos = ProcessPixel<129 >(r, c, rccode, chains, pos);
+#define ACTION_17   pos = ProcessPixel<144 >(r, c, rccode, chains, pos);
+#define ACTION_18   pos = ProcessPixel<145 >(r, c, rccode, chains, pos);
+#define ACTION_19   pos = ProcessPixel<152 >(r, c, rccode, chains, pos);
+#define ACTION_20   pos = ProcessPixel<192 >(r, c, rccode, chains, pos);
+#define ACTION_21   pos = ProcessPixel<193 >(r, c, rccode, chains, pos);
+#define ACTION_22   pos = ProcessPixel<200 >(r, c, rccode, chains, pos);
+#define ACTION_23   pos = ProcessPixel<256 >(r, c, rccode, chains, pos);
+#define ACTION_24   pos = ProcessPixel<257 >(r, c, rccode, chains, pos);
+#define ACTION_25   pos = ProcessPixel<292 >(r, c, rccode, chains, pos);
+#define ACTION_26   pos = ProcessPixel<293 >(r, c, rccode, chains, pos);
+#define ACTION_27   pos = ProcessPixel<308 >(r, c, rccode, chains, pos);
+#define ACTION_28   pos = ProcessPixel<309 >(r, c, rccode, chains, pos);
+#define ACTION_29   pos = ProcessPixel<512 >(r, c, rccode, chains, pos);
+#define ACTION_30   pos = ProcessPixel<513 >(r, c, rccode, chains, pos);
+#define ACTION_31   pos = ProcessPixel<528 >(r, c, rccode, chains, pos);
+#define ACTION_32   pos = ProcessPixel<529 >(r, c, rccode, chains, pos);
+#define ACTION_33   pos = ProcessPixel<536 >(r, c, rccode, chains, pos);
+#define ACTION_34   pos = ProcessPixel<576 >(r, c, rccode, chains, pos);
+#define ACTION_35   pos = ProcessPixel<577 >(r, c, rccode, chains, pos);
+#define ACTION_36   pos = ProcessPixel<584 >(r, c, rccode, chains, pos);
+#define ACTION_37   pos = ProcessPixel<768 >(r, c, rccode, chains, pos);
+#define ACTION_38   pos = ProcessPixel<769 >(r, c, rccode, chains, pos);
+#define ACTION_39   pos = ProcessPixel<776 >(r, c, rccode, chains, pos);
+#define ACTION_40   pos = ProcessPixel<804 >(r, c, rccode, chains, pos);
+#define ACTION_41   pos = ProcessPixel<805 >(r, c, rccode, chains, pos);
+#define ACTION_42   pos = ProcessPixel<820 >(r, c, rccode, chains, pos);
+#define ACTION_43   pos = ProcessPixel<821 >(r, c, rccode, chains, pos);
+#define ACTION_44   pos = ProcessPixel<828 >(r, c, rccode, chains, pos);
+#define ACTION_45   pos = ProcessPixel<1024>(r, c, rccode, chains, pos);
+#define ACTION_46   pos = ProcessPixel<1025>(r, c, rccode, chains, pos);
+#define ACTION_47   pos = ProcessPixel<1060>(r, c, rccode, chains, pos);
+#define ACTION_48   pos = ProcessPixel<1061>(r, c, rccode, chains, pos);
+#define ACTION_49   pos = ProcessPixel<1076>(r, c, rccode, chains, pos);
+#define ACTION_50   pos = ProcessPixel<1077>(r, c, rccode, chains, pos);
+#define ACTION_51   pos = ProcessPixel<2048>(r, c, rccode, chains, pos);
+#define ACTION_52   pos = ProcessPixel<2064>(r, c, rccode, chains, pos);
+#define ACTION_53   pos = ProcessPixel<2072>(r, c, rccode, chains, pos);
+#define ACTION_54   pos = ProcessPixel<2112>(r, c, rccode, chains, pos);
+#define ACTION_55   pos = ProcessPixel<2120>(r, c, rccode, chains, pos);
+#define ACTION_56   pos = ProcessPixel<2304>(r, c, rccode, chains, pos);
+#define ACTION_57   pos = ProcessPixel<2312>(r, c, rccode, chains, pos);
+#define ACTION_58   pos = ProcessPixel<2340>(r, c, rccode, chains, pos);
+#define ACTION_59   pos = ProcessPixel<2356>(r, c, rccode, chains, pos);
+#define ACTION_60   pos = ProcessPixel<2364>(r, c, rccode, chains, pos);
+#define ACTION_61   pos = ProcessPixel<3072>(r, c, rccode, chains, pos);
+#define ACTION_62   pos = ProcessPixel<3080>(r, c, rccode, chains, pos);
+#define ACTION_63   pos = ProcessPixel<3108>(r, c, rccode, chains, pos);
+#define ACTION_64   pos = ProcessPixel<3124>(r, c, rccode, chains, pos);
+#define ACTION_65   pos = ProcessPixel<3132>(r, c, rccode, chains, pos);
+
+	if (h == 1) {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		c = -1;
+		goto sl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_single_line_forest_code.inc.h"
+
+	}
+	else {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		goto fl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_first_line_forest_code.inc.h"    
+
+		// Build Raster Scan Chain Code
+		for (r = 1; r < h - 1; r++) {
+
+			previous_row_ptr = row_ptr;
+			row_ptr = next_row_ptr;
+			next_row_ptr += img_.step[0];
+
+			pos = 0;
+
+			c = -1;
+			goto cl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_center_line_forest_code.inc.h"
+
+		}
+
+		previous_row_ptr = row_ptr;
+		row_ptr = next_row_ptr;
+		next_row_ptr += img_.step[0];
+
+		pos = 0;
+
+		c = -1;
+		goto ll_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_last_line_forest_code.inc.h"
+
+	}
+
+
+
+#undef ACTION_1 
+#undef ACTION_2 
+#undef ACTION_3 
+#undef ACTION_4 
+#undef ACTION_5 
+#undef ACTION_6 
+#undef ACTION_7 
+#undef ACTION_8 
+#undef ACTION_9 
+#undef ACTION_10
+#undef ACTION_11
+#undef ACTION_12
+#undef ACTION_13
+#undef ACTION_14
+#undef ACTION_15
+#undef ACTION_16
+#undef ACTION_17
+#undef ACTION_18
+#undef ACTION_19
+#undef ACTION_20
+#undef ACTION_21
+#undef ACTION_22
+#undef ACTION_23
+#undef ACTION_24
+#undef ACTION_25
+#undef ACTION_26
+#undef ACTION_27
+#undef ACTION_28
+#undef ACTION_29
+#undef ACTION_30
+#undef ACTION_31
+#undef ACTION_32
+#undef ACTION_33
+#undef ACTION_34
+#undef ACTION_35
+#undef ACTION_36
+#undef ACTION_37
+#undef ACTION_38
+#undef ACTION_39
+#undef ACTION_40
+#undef ACTION_41
+#undef ACTION_42
+#undef ACTION_43
+#undef ACTION_44
+#undef ACTION_45
+#undef ACTION_46
+#undef ACTION_47
+#undef ACTION_48
+#undef ACTION_49
+#undef ACTION_50
+#undef ACTION_51
+#undef ACTION_52
+#undef ACTION_53
+#undef ACTION_54
+#undef ACTION_55
+#undef ACTION_56
+#undef ACTION_57
+#undef ACTION_58
+#undef ACTION_59
+#undef ACTION_60
+#undef ACTION_61
+#undef ACTION_62
+#undef ACTION_63
+#undef ACTION_64
+#undef ACTION_65
+
+#undef CONDITION_A
+#undef CONDITION_B
+#undef CONDITION_C
+#undef CONDITION_D
+#undef CONDITION_X
+#undef CONDITION_E
+#undef CONDITION_F
+#undef CONDITION_G
+#undef CONDITION_H
+
+
+	chain_code_ = ChainCode(rccode);
+}
+
+
+void Cederberg_Spaghetti_FREQ_hamlet_new::PerformChainCode() {
+
+	RCCode rccode;
+
+	int w = img_.cols;
+	int h = img_.rows;
+
+	vector<unsigned> chains;
+
+	const unsigned char* previous_row_ptr = nullptr;
+	const unsigned char* row_ptr = img_.ptr(0);
+	const unsigned char* next_row_ptr = row_ptr + img_.step[0];
+
+#define CONDITION_A     (previous_row_ptr[c - 1])                     
+#define CONDITION_B     (previous_row_ptr[c])                                  
+#define CONDITION_C     (previous_row_ptr[c + 1])         
+#define CONDITION_D     (row_ptr[c - 1])                                       
+#define CONDITION_X     (row_ptr[c])                                                    
+#define CONDITION_E     (row_ptr[c + 1])                           
+#define CONDITION_F     (next_row_ptr[c - 1])             
+#define CONDITION_G     (next_row_ptr[c])                          
+#define CONDITION_H     (next_row_ptr[c + 1]) 
+
+#define ACTION_1    pos = ProcessPixel<0	  >(r, c, rccode, chains, pos);
+#define ACTION_2    pos = ProcessPixel<1	  >(r, c, rccode, chains, pos);
+#define ACTION_3    pos = ProcessPixel<2	  >(r, c, rccode, chains, pos);
+#define ACTION_4    pos = ProcessPixel<3	  >(r, c, rccode, chains, pos);
+#define ACTION_5    pos = ProcessPixel<10  >(r, c, rccode, chains, pos);
+#define ACTION_6    pos = ProcessPixel<16  >(r, c, rccode, chains, pos);
+#define ACTION_7    pos = ProcessPixel<17  >(r, c, rccode, chains, pos);
+#define ACTION_8    pos = ProcessPixel<32  >(r, c, rccode, chains, pos);
+#define ACTION_9    pos = ProcessPixel<33  >(r, c, rccode, chains, pos);
+#define ACTION_10   pos = ProcessPixel<48  >(r, c, rccode, chains, pos);
+#define ACTION_11   pos = ProcessPixel<49  >(r, c, rccode, chains, pos);
+#define ACTION_12   pos = ProcessPixel<56  >(r, c, rccode, chains, pos);
+#define ACTION_13   pos = ProcessPixel<64  >(r, c, rccode, chains, pos);
+#define ACTION_14   pos = ProcessPixel<65  >(r, c, rccode, chains, pos);
+#define ACTION_15   pos = ProcessPixel<128 >(r, c, rccode, chains, pos);
+#define ACTION_16   pos = ProcessPixel<129 >(r, c, rccode, chains, pos);
+#define ACTION_17   pos = ProcessPixel<144 >(r, c, rccode, chains, pos);
+#define ACTION_18   pos = ProcessPixel<145 >(r, c, rccode, chains, pos);
+#define ACTION_19   pos = ProcessPixel<152 >(r, c, rccode, chains, pos);
+#define ACTION_20   pos = ProcessPixel<192 >(r, c, rccode, chains, pos);
+#define ACTION_21   pos = ProcessPixel<193 >(r, c, rccode, chains, pos);
+#define ACTION_22   pos = ProcessPixel<200 >(r, c, rccode, chains, pos);
+#define ACTION_23   pos = ProcessPixel<256 >(r, c, rccode, chains, pos);
+#define ACTION_24   pos = ProcessPixel<257 >(r, c, rccode, chains, pos);
+#define ACTION_25   pos = ProcessPixel<292 >(r, c, rccode, chains, pos);
+#define ACTION_26   pos = ProcessPixel<293 >(r, c, rccode, chains, pos);
+#define ACTION_27   pos = ProcessPixel<308 >(r, c, rccode, chains, pos);
+#define ACTION_28   pos = ProcessPixel<309 >(r, c, rccode, chains, pos);
+#define ACTION_29   pos = ProcessPixel<512 >(r, c, rccode, chains, pos);
+#define ACTION_30   pos = ProcessPixel<513 >(r, c, rccode, chains, pos);
+#define ACTION_31   pos = ProcessPixel<528 >(r, c, rccode, chains, pos);
+#define ACTION_32   pos = ProcessPixel<529 >(r, c, rccode, chains, pos);
+#define ACTION_33   pos = ProcessPixel<536 >(r, c, rccode, chains, pos);
+#define ACTION_34   pos = ProcessPixel<576 >(r, c, rccode, chains, pos);
+#define ACTION_35   pos = ProcessPixel<577 >(r, c, rccode, chains, pos);
+#define ACTION_36   pos = ProcessPixel<584 >(r, c, rccode, chains, pos);
+#define ACTION_37   pos = ProcessPixel<768 >(r, c, rccode, chains, pos);
+#define ACTION_38   pos = ProcessPixel<769 >(r, c, rccode, chains, pos);
+#define ACTION_39   pos = ProcessPixel<776 >(r, c, rccode, chains, pos);
+#define ACTION_40   pos = ProcessPixel<804 >(r, c, rccode, chains, pos);
+#define ACTION_41   pos = ProcessPixel<805 >(r, c, rccode, chains, pos);
+#define ACTION_42   pos = ProcessPixel<820 >(r, c, rccode, chains, pos);
+#define ACTION_43   pos = ProcessPixel<821 >(r, c, rccode, chains, pos);
+#define ACTION_44   pos = ProcessPixel<828 >(r, c, rccode, chains, pos);
+#define ACTION_45   pos = ProcessPixel<1024>(r, c, rccode, chains, pos);
+#define ACTION_46   pos = ProcessPixel<1025>(r, c, rccode, chains, pos);
+#define ACTION_47   pos = ProcessPixel<1060>(r, c, rccode, chains, pos);
+#define ACTION_48   pos = ProcessPixel<1061>(r, c, rccode, chains, pos);
+#define ACTION_49   pos = ProcessPixel<1076>(r, c, rccode, chains, pos);
+#define ACTION_50   pos = ProcessPixel<1077>(r, c, rccode, chains, pos);
+#define ACTION_51   pos = ProcessPixel<2048>(r, c, rccode, chains, pos);
+#define ACTION_52   pos = ProcessPixel<2064>(r, c, rccode, chains, pos);
+#define ACTION_53   pos = ProcessPixel<2072>(r, c, rccode, chains, pos);
+#define ACTION_54   pos = ProcessPixel<2112>(r, c, rccode, chains, pos);
+#define ACTION_55   pos = ProcessPixel<2120>(r, c, rccode, chains, pos);
+#define ACTION_56   pos = ProcessPixel<2304>(r, c, rccode, chains, pos);
+#define ACTION_57   pos = ProcessPixel<2312>(r, c, rccode, chains, pos);
+#define ACTION_58   pos = ProcessPixel<2340>(r, c, rccode, chains, pos);
+#define ACTION_59   pos = ProcessPixel<2356>(r, c, rccode, chains, pos);
+#define ACTION_60   pos = ProcessPixel<2364>(r, c, rccode, chains, pos);
+#define ACTION_61   pos = ProcessPixel<3072>(r, c, rccode, chains, pos);
+#define ACTION_62   pos = ProcessPixel<3080>(r, c, rccode, chains, pos);
+#define ACTION_63   pos = ProcessPixel<3108>(r, c, rccode, chains, pos);
+#define ACTION_64   pos = ProcessPixel<3124>(r, c, rccode, chains, pos);
+#define ACTION_65   pos = ProcessPixel<3132>(r, c, rccode, chains, pos);
+
+	if (h == 1) {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		c = -1;
+		goto sl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_new_single_line_forest_code.inc.h"
+
+	}
+	else {
+		int r = 0;
+		int c = -1;
+
+		unsigned int pos = 0;
+
+		goto fl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_new_first_line_forest_code.inc.h"    
+
+		// Build Raster Scan Chain Code
+		for (r = 1; r < h - 1; r++) {
+
+			previous_row_ptr = row_ptr;
+			row_ptr = next_row_ptr;
+			next_row_ptr += img_.step[0];
+
+			pos = 0;
+
+			c = -1;
+			goto cl_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_new_center_line_forest_code.inc.h"
+
+		}
+
+		previous_row_ptr = row_ptr;
+		row_ptr = next_row_ptr;
+		next_row_ptr += img_.step[0];
+
+		pos = 0;
+
+		c = -1;
+		goto ll_tree_0;
+
+#include "Cederberg_Spaghetti_FREQ_hamlet_new_last_line_forest_code.inc.h"
+
+	}
+
 
 
 #undef ACTION_1 
@@ -1392,8 +2482,13 @@ void Cederberg_Spaghetti::PerformChainCode() {
 #undef PIXEL_G
 #undef PIXEL_H
 
-//REGISTER_CHAINCODEALG(Cederberg)
-//REGISTER_CHAINCODEALG(Cederberg_LUT)
-//REGISTER_CHAINCODEALG(Cederberg_LUT_PRED)
-//REGISTER_CHAINCODEALG(Cederberg_DRAG)
+REGISTER_CHAINCODEALG(Cederberg)
+REGISTER_CHAINCODEALG(Cederberg_LUT)
+REGISTER_CHAINCODEALG(Cederberg_LUT_PRED)
+REGISTER_CHAINCODEALG(Cederberg_DRAG)
+REGISTER_CHAINCODEALG(Cederberg_Tree)
 REGISTER_CHAINCODEALG(Cederberg_Spaghetti)
+REGISTER_CHAINCODEALG(Cederberg_Spaghetti_FREQ)
+REGISTER_CHAINCODEALG(Cederberg_Spaghetti_FREQ_without_classical)
+REGISTER_CHAINCODEALG(Cederberg_Spaghetti_FREQ_hamlet)
+REGISTER_CHAINCODEALG(Cederberg_Spaghetti_FREQ_hamlet_new)

@@ -80,5 +80,32 @@ public:
 	}
 };
 
+class Cederberg_Spaghetti_FREQ_without_classical : public ChainCodeAlg {
+public:
+	virtual void PerformChainCode() override;
 
+	virtual void FreeChainCodeData() {
+		ChainCodeAlg::FreeChainCodeData();
+	}
+};
+
+
+class Cederberg_Spaghetti_FREQ_hamlet : public ChainCodeAlg {
+public:
+	virtual void PerformChainCode() override;
+
+	virtual void FreeChainCodeData() {
+		ChainCodeAlg::FreeChainCodeData();
+	}
+};
+
+
+class Cederberg_Spaghetti_FREQ_hamlet_new : public ChainCodeAlg {
+public:
+	virtual void PerformChainCode() override;
+
+	virtual void FreeChainCodeData() {
+		ChainCodeAlg::FreeChainCodeData();
+	}
+};
 #endif // BACCA_CHAINCODE_CEDERBERG_H_
