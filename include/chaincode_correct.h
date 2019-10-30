@@ -7,7 +7,7 @@
 
 #include <opencv2/core.hpp>
 
-class ChainCodeCorrect : public ChainCodeAlg {
+class ChainCode_OpenCV : public ChainCodeAlg {
 
 private:
 

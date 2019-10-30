@@ -71,7 +71,7 @@ public:
 };
 
 
-class Cederberg_Spaghetti_FREQ : public ChainCodeAlg {
+class Cederberg_Spaghetti_FREQ_All : public ChainCodeAlg {
 public:
 	virtual void PerformChainCode() override;
 
@@ -80,17 +80,7 @@ public:
 	}
 };
 
-class Cederberg_Spaghetti_FREQ_without_classical : public ChainCodeAlg {
-public:
-	virtual void PerformChainCode() override;
-
-	virtual void FreeChainCodeData() {
-		ChainCodeAlg::FreeChainCodeData();
-	}
-};
-
-
-class Cederberg_Spaghetti_FREQ_hamlet : public ChainCodeAlg {
+class Cederberg_Spaghetti_FREQ_AllNoClassical : public ChainCodeAlg {
 public:
 	virtual void PerformChainCode() override;
 
@@ -100,7 +90,7 @@ public:
 };
 
 
-class Cederberg_Spaghetti_FREQ_hamlet_new : public ChainCodeAlg {
+class Cederberg_Spaghetti_FREQ_Hamlet : public ChainCodeAlg {
 public:
 	virtual void PerformChainCode() override;
 
@@ -108,4 +98,6 @@ public:
 		ChainCodeAlg::FreeChainCodeData();
 	}
 };
+
+
 #endif // BACCA_CHAINCODE_CEDERBERG_H_
