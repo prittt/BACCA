@@ -1,0 +1,78 @@
+%YAML:1.2
+---
+########################################
+# This is the BACCA configuration file #
+########################################
+
+# -------------------------------------------------------------------------------------
+# Tests to perform and their number of repetitions
+# -------------------------------------------------------------------------------------
+
+# Kind of tests to execute
+perform: 
+  correctness:        false
+  average:            true
+  average_with_steps: false  
+  
+correctness_tests: 
+  standard: true
+  steps:    false
+  
+# Number of tests repetitions 
+tests_number: 
+  average:            10
+  average_with_steps: 10
+
+# -------------------------------------------------------------------------------------
+# List of chain-code algorithms to test
+# -------------------------------------------------------------------------------------
+
+# <implementation_name> [,<name_to_be_displayed>] [; <reference_impl_name>]
+# where:
+#   * "implementation_name" : is the name of the algorithm class implementation
+#
+#   * "name_to_be_displayed": is the name that will be used inside output charts and 
+#      tables. If it is not specified "implementation_name" will be used 
+#
+#   * "reference_impl_name" : is the name of the reference algorithm class implementation
+#      that will be used to check the correctness of the algorithm specified by the 
+#      "implementation_name"
+algorithms: 
+  - Suzuki                          , Suzuki85(OpenCV)      ; Suzuki
+  - Cederberg_LUT                   , Cederberg_LUT         ; Suzuki
+  - Cederberg_LUT_PRED              , Cederberg_LUT_PRED    ; Suzuki
+  - Cederberg_Tree                  , Cederberg_Tree        ; Suzuki
+  - Cederberg_Spaghetti             , Cederberg_Spaghetti   ; Suzuki
+  - Cederberg_Spaghetti_FREQ_All    , Cederberg_SpaghettiF  ; Suzuki
+
+# -------------------------------------------------------------------------------------
+# Datasets to use for each test
+# -------------------------------------------------------------------------------------
+
+# List of datasets on which "Correctness Tests" shall be run
+check_datasets: ["check", "3dpes", "fingerprints", "hamlet", "medical", "mirflickr", "tobacco800", "xdocs"]
+
+# List of datasets on which "Average Runtime Tests" shall be run
+average_datasets: ["3dpes", "fingerprints", "hamlet", "medical", "mirflickr", "tobacco800", "xdocs"]
+
+# List of datasets on which "Average Runtime Tests With Steps" shall be run
+average_datasets_with_steps: ["3dpes", "fingerprints", "hamlet", "medical", "mirflickr", "tobacco800", "xdocs"]
+
+# -------------------------------------------------------------------------------------
+# Additional utilities
+# -------------------------------------------------------------------------------------
+
+# Save output images
+output_images: false
+
+# Directory for input/output paths
+paths: {input: "${BACCA_INPUT_DATASET_PATH}", output: "${BACCA_OUTPUT_RESULTS_PATH}"}
+
+# Save the results of each run test
+save_middle_tests: {average: false, average_with_steps: false}
+
+os: "${BACCA_OS}"
+
+########################################
+# This is the BACCA configuration file #
+########################################
