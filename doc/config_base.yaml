@@ -62,9 +62,6 @@ average_datasets_with_steps: ["3dpes", "fingerprints", "hamlet", "medical", "mir
 # Additional utilities
 # -------------------------------------------------------------------------------------
 
-# Save output images
-output_images: false
-
 # Directory for input/output paths
 paths: {input: "${BACCA_INPUT_DATASET_PATH}", output: "${BACCA_OUTPUT_RESULTS_PATH}"}
 

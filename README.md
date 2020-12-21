@@ -3,13 +3,13 @@
 # BACCA: Benchmark Another Chain Code Algorithm
 
 <p align="justify">
-BACCA is an open source <i>C++</i> chain code benchmarking framework, developed from a modification of <a href="https://github.com/prittt/YACCLAB">YACCLAB</a>. BACCA provides <i>correctness</i> and average run-time (<i>average</i>) tests for chain code (alsoo known as boundary tracing) algorithms over a collection of real world datasets.
+BACCA is an open source <i>C++</i> chain code benchmarking framework, developed from a modification of <a href="https://github.com/prittt/YACCLAB">YACCLAB</a>. BACCA provides <i>correctness</i> and average run-time (<i>average</i>) tests for chain code (also known as boundary tracing) algorithms over a collection of real world datasets.
 
 </p>
 
 ## Requirements
 
-<p align="justify">To correctly install and run BACCA following packages, libraries and utilities are needed:</p>
+<p align="justify">To correctly install and run BACCA the following packages, libraries and utilities are needed:</p>
 
 - CMake 3.0.0 or higher (https://cmake.org),
 - OpenCV 3.0 or higher (http://opencv.org),
@@ -55,8 +55,8 @@ perform:
 - <i>correctness_tests</i> - dictionary indicating the kind of correctness tests to perform:
 ```yaml
 correctness_tests:
-  eight_connectivity_standard: true
-  eight_connectivity_steps:    true
+  standard: true
+  steps:    true
 ```
 
 - <i>tests_number</i> - dictionary which sets the number of runs for each test available:
@@ -89,17 +89,7 @@ average_datasets: ["3dpes", "fingerprints", "hamlet", "medical", "mirflickr", "t
 paths: {input: "<datasets_path>", output: "<output_results_path>"}
 ```
 
-- <i>write_n_labels</i> - whether to report the number of connected components in the output files:
-```yaml
-write_n_labels: false
-```
-
-- <i>color_labels</i> - whether to output a colored version of labeled images during tests:
-```yaml
-color_labels: {average: false, density: false}
-```
-
 - <i>save_middle_tests</i> - dictionary specifying, separately for every test, whether to save the output of single runs, or only a summary of the whole test:
 ```yaml
-save_middle_tests: {average: false, average_with_steps: false, density: false, granularity: false}
+save_middle_tests: {average: false, average_with_steps: false}
 ```
