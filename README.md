@@ -3,8 +3,7 @@
 # BACCA: Benchmark Another Chain Code Algorithm
 
 <p align="justify">
-BACCA is an open source <i>C++</i> chain code benchmarking framework, developed from a modification of <a href="https://github.com/prittt/YACCLAB">YACCLAB</a>. BACCA provides <i>correctness</i> and average run-time (<i>average</i>) tests for chain code (also known as boundary tracing) algorithms over a collection of real world datasets.
-
+BACCA is an open source <i>C++</i> chain code benchmarking framework, developed using <a href="https://github.com/prittt/YACCLAB">YACCLAB</a> <a href="https://github.com/prittt/YACCLAB/releases/tag/v2.0">v2.0</a> as a starting point. BACCA provides <i>correctness</i> and average run-time (<i>average</i>) tests for chain code (also known as boundary tracing) algorithms over a collection of real world datasets.
 </p>
 
 ## Requirements
