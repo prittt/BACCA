@@ -54,7 +54,7 @@ BACCA is an open source <i>C++</i> chain code benchmarking framework, developed 
 
 <p align="justify">To correctly install and run BACCA the following packages, libraries and utilities are needed:</p>
 
-- CMake 3.0.0 or higher (https://cmake.org),
+- CMake 3.13 or higher (https://cmake.org),
 - OpenCV 3.0 or higher (http://opencv.org),
 - Gnuplot (http://www.gnuplot.info/),
 - One of your favourite IDE/compiler: Visual Studio 2013 or higher, Xcode 5.0.1, gcc 4.7 or higher, .. (with C++11 support)
