@@ -1,10 +1,54 @@
 <img src="doc/BACCA.png" height="150px" align="right">
 
 # BACCA: Benchmark Another Chain Code Algorithm
+<!-- [![release](https://img.shields.io/github/v/release/prittt/BACCA)](https://github.com/prittt/BACCA/releases/latest/) -->
+[![license](https://img.shields.io/github/license/prittt/BACCA)](https://github.com/prittt/BACCA/blob/master/LICENSE)
 
 <p align="justify">
 BACCA is an open source <i>C++</i> chain code benchmarking framework, developed using <a href="https://github.com/prittt/YACCLAB">YACCLAB</a> <a href="https://github.com/prittt/YACCLAB/releases/tag/v2.0">v2.0</a> as a starting point. BACCA provides <i>correctness</i> and average run-time (<i>average</i>) tests for chain code (also known as boundary tracing) algorithms over a collection of real world datasets.
 </p>
+
+
+
+<table>
+<thead>
+<tr>
+    <th>OS</th>
+    <th>Build</th>
+    <th>Compiler</th>
+    <th>OpenCV</th>
+    <th>CMake</th>
+    <!--<th width="200px">Travis CI</th>-->
+    <th width="200px">GitHub Actions</th>
+</tr>
+<thead>
+<tbody>
+<tr>
+    <td align="center">Ubuntu<br/>16.04 LTS</td>
+    <td align="center">x32</td>
+    <td align="center">gcc 5.4.0</td>
+    <td align="center">3.0.0</td>
+    <td align="center">3.13.5</td>
+    <td align="center"><a href="https://github.com/prittt/BACCA/actions"><img src="https://github.com/prittt/BACCA/workflows/linux32/badge.svg?branch=master" alt="Build Status"/></a></td>
+</tr>
+<tr>
+    <td align="center">Ubuntu<br/>18.04 LTS</td>
+    <td align="center">x64</td>
+    <td align="center">gcc 9.3.0</td>
+    <td align="center">4.1.2</td>
+    <td align="center">3.13.5</td><td align="center"><a href="https://github.com/prittt/BACCA/actions"><img src="https://github.com/prittt/BACCA/workflows/linux64/badge.svg?branch=master" alt="Build Status"/></a></td>
+</tr>
+<tr>
+    <td align="center">MacOS<br/>(Darwin 19.6.0)</td>
+    <td align="center">x64</td>
+    <td align="center">AppleClang 12.0.0<br/>(Xcode-12)</td>
+    <td align="center">3.1.0</td>
+    <td align="center">3.13.0</td>
+    <td align="center"><a href="https://github.com/prittt/BACCA/actions"><img src="https://github.com/prittt/BACCA/workflows/macos/badge.svg?branch=master" alt="Build Status"/></a></td>
+</tr>
+</tbody>
+</table>
+
 
 ## Requirements
 

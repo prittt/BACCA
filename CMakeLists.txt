@@ -19,7 +19,7 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE PATH "Install prefix" FORCE
 set(BACCA_DOWNLOAD_DATASET OFF CACHE BOOL "If flagged the BACCA dataset will be automatically downloaded")
 set(BACCA_INPUT_DATASET_PATH "${CMAKE_INSTALL_PREFIX}/input" CACHE PATH "'input' dataset path") 
 set(BACCA_OUTPUT_RESULTS_PATH "${CMAKE_INSTALL_PREFIX}/output" CACHE PATH "'output' results path") 
-#set(BACCA_IS_TRAVIS_CI OFF CACHE BOOL "This variable is used to handle travis-ci parameters, do not change its value")
+set(BACCA_IS_TRAVIS_CI OFF CACHE INTERNAL "This variable is used to handle travis-ci parameters, do not change its value")
 
 if(MSVC)
     set(CMAKE_USE_RELATIVE_PATHS ON CACHE INTERNAL "" FORCE)
@@ -75,11 +75,11 @@ file(GLOB INCFILES ${INCFILES} "include/*.inc" "include/*.inc.h")
 
 add_definitions(-D_CRT_SECURE_NO_WARNINGS) #To suppress 'fopen' opencv warning/bug  
 # Set configuration file    
-#if(BACCA_IS_TRAVIS_CI)    
-#    configure_file("${CMAKE_SOURCE_DIR}/doc/config_travis.yaml" "${CMAKE_INSTALL_PREFIX}/config.yaml")
-#else()
-    configure_file("${CMAKE_SOURCE_DIR}/doc/config_base.yaml" "${CMAKE_INSTALL_PREFIX}/config.yaml")
-#endif()
+if(BACCA_IS_TRAVIS_CI)    
+    configure_file("${CMAKE_SOURCE_DIR}/doc/config_travis.yaml" "${CMAKE_INSTALL_PREFIX}/config.yaml")
+else()
+   configure_file("${CMAKE_SOURCE_DIR}/doc/config_base.yaml" "${CMAKE_INSTALL_PREFIX}/config.yaml")
+endif()
 source_group("Include Files" FILES ${INCFILES})
 source_group("Header Files" FILES ${HFILES})
 source_group("Source Files" FILES ${SRCFILES})
