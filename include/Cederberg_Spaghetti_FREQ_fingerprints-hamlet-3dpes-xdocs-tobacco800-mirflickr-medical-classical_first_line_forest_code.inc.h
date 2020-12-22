@@ -3,6 +3,9 @@
 //
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// The following code has been generated with GRAPHGEN:
+// https://github.com/prittt/GRAPHGEN
 
 fl_tree_0: if ((c+=1) >= w - 1) goto fl_break_0_0;
 		if (CONDITION_X) {
