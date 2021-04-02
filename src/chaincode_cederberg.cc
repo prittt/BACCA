@@ -306,7 +306,7 @@ unsigned int ProcessPixelNaive(int r, int c, unsigned short state, RCCode& rccod
     if (state & MAX_OUTER) {
         rccode.AddElem(r, c);
 
-        chains.insert(chains.begin() + pos, 2, rccode.Size() - 1);
+        chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
 
         pos += 2;
 
@@ -410,10 +410,10 @@ unsigned int ProcessPixelNaive(int r, int c, unsigned short state, RCCode& rccod
         rccode.AddElem(r, c);
 
         if (last_found_right) {
-            chains.insert(chains.begin() + pos - 1, 2, rccode.Size() - 1);
+            chains.insert(chains.begin() + pos - 1, 2, static_cast<int>(rccode.Size()) - 1);
         }
         else {
-            chains.insert(chains.begin() + pos, 2, rccode.Size() - 1);
+            chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
         }
 
         pos += 2;
@@ -508,7 +508,7 @@ inline unsigned int ProcessPixel(int r, int c, RCCode& rccode, vector<unsigned>&
     if (state & MAX_OUTER) {
         rccode.AddElem(r, c);
 
-        chains.insert(chains.begin() + pos, 2, rccode.Size() - 1);
+        chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
 
         pos += 2;
 
@@ -612,10 +612,10 @@ inline unsigned int ProcessPixel(int r, int c, RCCode& rccode, vector<unsigned>&
         rccode.AddElem(r, c);
 
         if (last_found_right) {
-            chains.insert(chains.begin() + pos - 1, 2, rccode.Size() - 1);
+            chains.insert(chains.begin() + pos - 1, 2, static_cast<int>(rccode.Size()) - 1);
         }
         else {
-            chains.insert(chains.begin() + pos, 2, rccode.Size() - 1);
+            chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
         }
 
         pos += 2;
@@ -665,7 +665,7 @@ void Cederberg::PerformChainCode() {
         next_row_ptr += img_.step[0];
     }
 
-    chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 void Cederberg_LUT::PerformChainCode() {
@@ -706,7 +706,7 @@ void Cederberg_LUT::PerformChainCode() {
         next_row_ptr += img_.step[0];
     }
 
-    chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 void Cederberg_LUT_PRED::PerformChainCode() {
@@ -761,7 +761,7 @@ void Cederberg_LUT_PRED::PerformChainCode() {
         next_row_ptr += img_.step[0];
     }
 
-    chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 void Cederberg_DRAG::PerformChainCode() {
@@ -954,7 +954,7 @@ void Cederberg_DRAG::PerformChainCode() {
 
     }
 
-    chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 void Cederberg_DRAG::PerformChainCodeWithSteps() {
@@ -1165,7 +1165,7 @@ RCCode Cederberg_DRAG::PerformRCCode() {
 }
 
 void Cederberg_DRAG::ConvertToChainCode(const RCCode& rccode) {
-    chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 void Cederberg_Spaghetti::PerformChainCode() {
@@ -1387,7 +1387,7 @@ void Cederberg_Spaghetti::PerformChainCode() {
 #undef CONDITION_H
 
 
-	chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 
@@ -1611,7 +1611,7 @@ void Cederberg_Spaghetti_FREQ_All::PerformChainCode() {
 #undef CONDITION_H
 
 
-	chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 
@@ -1796,7 +1796,7 @@ void Cederberg_Tree::PerformChainCode() {
 #undef CONDITION_H
     }
 
-	chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 
@@ -2019,7 +2019,7 @@ void Cederberg_Spaghetti_FREQ_AllNoClassical::PerformChainCode() {
 #undef CONDITION_H
 
 
-	chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 
@@ -2243,7 +2243,7 @@ void Cederberg_Spaghetti_FREQ_Hamlet::PerformChainCode() {
 #undef CONDITION_H
 
 
-	chain_code_ = ChainCode(rccode);
+    RCCodeToChainCode(rccode, chain_code_);
 }
 
 

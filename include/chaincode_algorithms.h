@@ -21,7 +21,9 @@ class ChainCodeAlg {
 public:
     static cv::Mat1b img_;
 
+    bool with_hierarchy_ = false;
     ChainCode chain_code_;
+    std::vector<cv::Vec4i> hierarchy_;
 
     PerformanceEvaluator perf_;
 
@@ -32,7 +34,7 @@ public:
     virtual void PerformChainCodeWithSteps() { throw std::runtime_error("'PerformChainCodeWithSteps()' not implemented"); }
     virtual void PerformChainCodeMem(std::vector<uint64_t>& accesses) { throw std::runtime_error("'PerformChainCodeMem(...)' not implemented"); }
 
-    virtual void FreeChainCodeData() { chain_code_.Clean(); }
+    virtual void FreeChainCodeData() { chain_code_.Clean(); hierarchy_.clear(); hierarchy_.shrink_to_fit(); }
 
 };
 

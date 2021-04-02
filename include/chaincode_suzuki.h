@@ -31,4 +31,23 @@ public:
 };
 
 
+class SuzukiTopology : public ChainCodeAlg {
+
+private:
+
+    std::vector<std::vector<cv::Point>> FindContours();
+    void ConvertToChainCode(const std::vector<std::vector<cv::Point>>& cv_contours);
+
+public:
+    virtual void PerformChainCode() override;
+    virtual void PerformChainCodeWithSteps() override;
+
+    virtual void FreeChainCodeData() override {
+        ChainCodeAlg::FreeChainCodeData();
+    }
+
+};
+
+
+
 #endif // BACCA_CHAINCODE_SUZUKI_H_

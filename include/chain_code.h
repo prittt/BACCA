@@ -16,95 +16,132 @@
 
 #include <vector>
 #include <set>
+#include <memory>
+#include <algorithm>
+#include <numeric>
 
 #include <opencv2/imgproc.hpp>
 
 #define PREALLOC_ELEMS 5000
 //#define PREALLOC_INTS 3
 
-struct RCCode {
-    int value_count = 0;
-    RCCode () {
-        //data.resize(PREALLOC_ELEMS);
+struct RCNode {
+
+    enum class Status { O, H, potO, potH, none };
+
+    int elem_index;
+    RCNode* father = nullptr;
+    std::vector<std::unique_ptr<RCNode>> children;
+    Status status = Status::none;
+
+    RCNode(int elem_index_) : elem_index(elem_index_) {}
+    RCNode(int elem_index_, RCNode* father_) : elem_index(elem_index_), father(father_) {}
+    RCNode(int elem_index_, RCNode* father_, Status status_) :
+        elem_index(elem_index_), father(father_), status(status_) {}
+
+    RCNode* EmplaceChild(int elem_index_, Status status_) {
+        children.push_back(std::move(std::make_unique<RCNode>(elem_index_, this, status_)));
+        return children.back().get();
     }
 
-    struct Elem  {
+    void DeleteChild(RCNode* child) {
+        auto is_child = [child](std::unique_ptr<RCNode>& n) {return n.get() == child; };
 
-        struct Chain {
-        private:
-            std::vector<uint32_t> internal_values;
-            //unsigned elem; // index of the corresponding elem in vector
-        public:
-            size_t value_count = 0;
+        auto child_it = std::find_if(std::begin(children), std::end(children), is_child);
+        assert(child_it != std::end(children));
 
-            Chain() {
-                //internal_values.resize(PREALLOC_INTS);
-            }
-           // Chain(unsigned elem_) : elem(elem_) {}
-            inline void push_back(uint8_t val) {
-                if ((value_count & 15) == 0 /*&& value_count / 16 >= PREALLOC_INTS*/) {
-                    internal_values.push_back(0);
-                }
+        children.erase(child_it);
+    }
+};
 
-                internal_values[value_count / 16] |= ((val & 3) << ((value_count & 15) << 1));
-                value_count++;
+struct RCCode {
+
+    struct Chain {
+    private:
+        std::vector<uint32_t> internal_values;
+        //unsigned elem; // index of the corresponding elem in vector
+    public:
+        unsigned int value_count = 0;
+
+        Chain() {
+            //internal_values.resize(PREALLOC_INTS);
+        }
+        // Chain(unsigned elem_) : elem(elem_) {}
+        inline void push_back(uint8_t val) {
+            if ((value_count & 15) == 0 /*&& value_count / 16 >= PREALLOC_INTS*/) { // x & 15 is a "clever" way of doing x % 16
+                internal_values.push_back(0);
             }
-            inline const uint8_t get_value(unsigned index) const {
-                int internal_index = index / 16;
-                return (internal_values[internal_index] >> ((index % 16) * 2)) & 3;
-            }
-            //auto begin() { return vals.begin(); }
-            //auto begin() const { return vals.begin(); }
-            //auto end() { return vals.end(); }
-            //auto end() const { return vals.end(); }
-        };
+
+            internal_values[value_count / 16] |= ((val & 3) << ((value_count & 15) * 2));
+            value_count++;
+        }
+
+        // TODO try to optimize removal and successive addition
+        inline uint8_t pop_back() {
+            value_count--;
+            const unsigned int index = value_count / 16;
+            uint8_t res = (internal_values[index] >> ((value_count & 15) * 2)) & 3;
+            // zero the two bits of the popped value
+            internal_values[index] &= ~(3 << ((value_count & 15) * 2));
+            return res;
+        }
+
+        inline const uint8_t get_value(unsigned index) const {
+            return (internal_values[index / 16] >> ((index % 16) * 2)) & 3;
+        }
+        //auto begin() { return vals.begin(); }
+        //auto begin() const { return vals.begin(); }
+        //auto end() { return vals.end(); }
+        //auto end() const { return vals.end(); }
+    };
+
+    struct MaxPoint  {        
 
         unsigned row, col;
         Chain left;
         Chain right;
         unsigned next; // vector index of the elem whose left chain is linked to this elem right chain
+        RCNode* node = nullptr; // it is not known if this added field is bad for performance when it is not used
 
-        Elem() {}
-        Elem(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(), right(), next(elem_) {}
+        // MaxPoint() {}
+        MaxPoint(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(), right(), next(elem_) {}
+        MaxPoint(unsigned r_, unsigned c_, unsigned elem_, RCNode* node_) : 
+            row(r_), col(c_), left(), right(), next(elem_), node(node_) {}
 
-        //Chain& operator[](bool right_) {
-        //    if (right_) return right;
-        //    else return left;
-        //}
-        //const Chain& operator[](bool right_) const {
-        //    if (right_) return right;
-        //    else return left;
-        //}
     };
 
-    std::vector<Elem> data;
-
     void AddElem(unsigned r_, unsigned c_) {
-        /*if (value_count < PREALLOC_ELEMS) {
-            // unsigned r_, unsigned c_, unsigned elem_
-            data[value_count].row = r_;
-            data[value_count].col = c_;
-            data[value_count].next = value_count;
-        }
-        else {*/
-            data.emplace_back(r_, c_, data.size());
-        /*}*/
+        data.emplace_back(r_, c_, static_cast<unsigned int>(data.size()));
         value_count++;
     }
+    void AddElem(unsigned r_, unsigned c_, RCNode* node_) {
+        data.emplace_back(r_, c_, static_cast<unsigned int>(data.size()), node_);
+        value_count++;
+    }
+
 
     size_t Size() const { 
         return value_count;
     }
 
-    Elem& operator[](unsigned pos) { return data[pos]; }
-    const Elem& operator[](unsigned pos) const { return data[pos]; }
+    MaxPoint& operator[](unsigned pos) { return data[pos]; }
+    const MaxPoint& operator[](unsigned pos) const { return data[pos]; }
 
     void Clean() {
-        data = std::vector<Elem>();
-        //data.resize(0);
-        //data.shrink_to_fit();
+        data = std::vector<MaxPoint>();
     }
+
+    RCCode(bool retrieve_topology = false) {
+        if (retrieve_topology) {
+            root = std::make_unique<RCNode>(-1);
+        }
+    }
+
+    int value_count = 0;
+    std::vector<MaxPoint> data;
+    std::unique_ptr<RCNode> root;
 };
+
 
 struct ChainCode {
 
@@ -113,13 +150,13 @@ struct ChainCode {
         unsigned row, col;
         std::vector<uint32_t> internal_values;
 
-        Chain() {}
+        Chain() = default;
         Chain(unsigned row_, unsigned col_) : row(row_), col(col_) {}
 
         bool operator==(const Chain& rhs) const;
         bool operator<(const Chain& rhs) const;
-        void AddRightChain(const RCCode::Elem::Chain& chain);
-        void AddLeftChain(const RCCode::Elem::Chain& chain);
+        void AddRightChain(const RCCode::Chain& chain);
+        void AddLeftChain(const RCCode::Chain& chain);
         //const uint8_t& operator[](size_t pos) const { return vals[pos]; }
         //std::vector<uint8_t>::const_iterator begin() const { return vals.begin(); }
         //std::vector<uint8_t>::const_iterator end() const { return vals.end(); }
@@ -131,28 +168,27 @@ struct ChainCode {
                 internal_values.push_back(0);
             }
 
-            internal_values[internal_values.size() - 1] |= ((val & 15) << ((value_count % 8) * 4));
+            internal_values[internal_values.size() - 1] |= ((val & 15) << ((value_count & 7) * 4));
             value_count++;
         }
         const uint8_t get_value(unsigned index) const {
             int internal_index = index / 8;
-            return (internal_values[internal_index] >> ((index % 8) * 4)) & 15;
+            return (internal_values[internal_index] >> ((index & 7) * 4)) & 15;
         }
 
     };
 
     std::vector<Chain> chains;
 
-    ChainCode() {}
-    ChainCode(const RCCode& rccode);
+    ChainCode() = default;
     ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool contrary = false);
 
     const Chain& operator[](size_t pos) const { return chains[pos]; }
     std::vector<Chain>::const_iterator begin() const { return chains.begin(); }
     std::vector<Chain>::const_iterator end() const { return chains.end(); }
-    void AddChain(const RCCode& rccode, std::vector<bool>& used_elems, unsigned pos);
+    void AddChain(const RCCode& rccode, std::vector<int>& used_elems, unsigned pos);
     bool operator==(const ChainCode& rhs) const {
-        return std::set<Chain>(chains.begin(), chains.end()) == std::set<Chain>(rhs.chains.begin(), rhs.chains.end());
+        return chains == rhs.chains;
     }
     bool operator!=(const ChainCode& rhs) const {
         return !(*this == rhs);
@@ -165,5 +201,18 @@ struct ChainCode {
     }
 
 };
+
+
+void RCCodeToChainCode(const RCCode& rccode, ChainCode& chcode, std::vector<cv::Vec4i>& hierarchy);
+void RCCodeToChainCode(const RCCode& rccode, ChainCode& chcode);
+
+bool CheckHierarchy(const std::vector<cv::Vec4i>& hierarchy);
+
+void SortChains(ChainCode& chcode);
+void SortChains(ChainCode& chcode, std::vector<cv::Vec4i>& hierarchy);
+
+
+
+
 
 #endif // BACCA_CHAIN_CODE_H_

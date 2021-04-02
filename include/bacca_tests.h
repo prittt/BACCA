@@ -106,10 +106,11 @@ private:
                     std::string algo_name = thin_algorithms[alg].test_name;
                     std::string check_algo_name = thin_algorithms[alg].check_name;
 
-                    // SAUF with Union-Find is the reference: labels are already "normalized"
+
                     ChainCodeAlg *ref = ChainCodeAlgMapSingleton::GetChainCodeAlg(check_algo_name);
                     ref->PerformChainCode();
                     ChainCode chain_code_correct = ref->chain_code_;
+                    std::vector<cv::Vec4i> hierarchy_correct = ref->hierarchy_;
                     ref->FreeChainCodeData();
 
                     ChainCodeAlg *algorithm = ChainCodeAlgMapSingleton::GetChainCodeAlg(algo_name);
@@ -118,13 +119,39 @@ private:
                     if (stats[j]) {
                         (algorithm->*func)(std::forward<Args>(args)...);
 
-                        ChainCode chain_code_to_control = algorithm->chain_code_;
+                        ChainCode chain_code_to_check = algorithm->chain_code_;
+                        std::vector<cv::Vec4i> hierarchy_to_check = algorithm->hierarchy_;
                         
-                        bool diff = (chain_code_correct == chain_code_to_control);
+                        bool diff = false;
+                        if (algorithm->with_hierarchy_) {
 
+                            if (!CheckHierarchy(hierarchy_correct))
+                                throw std::runtime_error("Correct algorithm yielded a wrong hierarchy!");
+
+                            if (CheckHierarchy(hierarchy_to_check)) {
+
+                                SortChains(chain_code_correct, hierarchy_correct);
+                                SortChains(chain_code_to_check, hierarchy_to_check);
+
+                                diff = (hierarchy_correct != hierarchy_to_check);
+
+                            }
+                            else {
+                                diff = true;
+                            }
+
+                        }
+                        else {
+                            SortChains(chain_code_correct);
+                            SortChains(chain_code_to_check);
+                        }
+
+                        if (!algorithm->with_hierarchy_ || !diff) {
+                            diff = (chain_code_correct != chain_code_to_check);
+                        }
                         algorithm->FreeChainCodeData(); // Free algorithm's data
 
-                        if (!diff) {
+                        if (diff) {
                             stats[j] = false;
                             first_fail[j] = (filesystem::path(dataset_name) / filesystem::path(filename)).string();
 
