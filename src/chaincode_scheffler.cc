@@ -182,15 +182,24 @@ TemplateCheck::Template TemplateCheck::templates[] = {
 
 void MergeNodes(RCNode* dst, RCNode* src, RCCode& rccode, bool different_status = false) {
     unsigned int index = src->elem_index;
-    unsigned int next_index;
+    
+    // Update node pointer in src max point
+    rccode[index].node = dst;
 
-    // Update node pointer in max points
-    while (true) {
+    // Update node pointer in next max points
+    unsigned int next_index = rccode[index].next;
+    while (next_index != index) {
+        index = next_index;
         rccode[index].node = dst;
         next_index = rccode[index].next;
-        if (next_index == index)
-            break;
-        index = next_index;
+    }
+
+    // Update node pointer in prev max points
+    unsigned int prev_index = rccode[index].prev;
+    while (prev_index != index) {
+        index = prev_index;
+        rccode[index].node = dst;
+        prev_index = rccode[index].prev;
     }
 
     // Reparent children of src
@@ -202,6 +211,8 @@ void MergeNodes(RCNode* dst, RCNode* src, RCCode& rccode, bool different_status 
         make_move_iterator(src->children.begin()),
         make_move_iterator(src->children.end()));
 
+    // Let's re-add this.
+    // Nodes once again point to the top-left maxpoint in the contour.
     dst->elem_index = min(dst->elem_index, src->elem_index);
 
     src->father->DeleteChild(src);
@@ -242,9 +253,11 @@ inline void ConnectChainsTopology(RCCode& rccode, vector<unsigned>& chains, unsi
 
     if (outer) {
         rccode[chains[pos - 1]].next = chains[pos - 2];
+        rccode[chains[pos - 2]].prev = chains[pos - 1];
     }
     else {
         rccode[chains[pos - 2]].next = chains[pos - 1];
+        rccode[chains[pos - 1]].prev = chains[pos - 2];
     }
 
     // Remove chains from vector
@@ -571,6 +584,10 @@ void SchefflerTopology::PerformChainCode() {
 
             uint16_t state = TemplateCheck::CondToState(condition);
 
+            if (r == 238 && c == 293) {
+                int x = 0;
+            }
+
             pos = ProcessPixelNaiveTopology(r, c, state, rccode, chains, pos, chain_is_left, &object, &hole);
         }
 
@@ -584,18 +601,18 @@ void SchefflerTopology::PerformChainCode() {
 
 
 
-#undef D0_L         
-#undef D0_R         
-#undef D1_L         
-#undef D1_R         
-#undef D2_L         
-#undef D2_R         
-#undef D3_L         
-#undef D3_R         
-#undef MIN_O   
-#undef MIN_I   
-#undef MAX_O   
-#undef MAX_I   
+#undef D0_L
+#undef D0_R
+#undef D1_L
+#undef D1_R
+#undef D2_L
+#undef D2_R
+#undef D3_L
+#undef D3_R
+#undef MIN_O
+#undef MIN_I
+#undef MAX_O
+#undef MAX_I
 
 #undef PIXEL_A
 #undef PIXEL_B

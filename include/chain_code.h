@@ -100,13 +100,16 @@ struct RCCode {
         unsigned row, col;
         Chain left;
         Chain right;
-        unsigned next; // vector index of the elem whose left chain is linked to this elem right chain
+        unsigned next;  // vector index of the elem whose left chain is linked to this elem right chain
+        unsigned prev;  // vector index of the elem whose right chain is linked to this elem left chain
+                        // prev field is only necessary when hierarchy is needed,
+                        // it is not known if prev field is bad for performance when it is not used
         RCNode* node = nullptr; // it is not known if this added field is bad for performance when it is not used
 
         // MaxPoint() {}
-        MaxPoint(unsigned r_, unsigned c_, unsigned elem_) : row(r_), col(c_), left(), right(), next(elem_) {}
         MaxPoint(unsigned r_, unsigned c_, unsigned elem_, RCNode* node_) : 
-            row(r_), col(c_), left(), right(), next(elem_), node(node_) {}
+            row(r_), col(c_), left(), right(), next(elem_), prev(elem_), node(node_) {}
+        MaxPoint(unsigned r_, unsigned c_, unsigned elem_) : MaxPoint(r_, c_, elem_, nullptr) {}
 
     };
 
@@ -129,6 +132,7 @@ struct RCCode {
 
     void Clean() {
         data = std::vector<MaxPoint>();
+        root = nullptr;
     }
 
     RCCode(bool retrieve_topology = false) {
@@ -147,7 +151,7 @@ struct ChainCode {
 
     struct Chain {
 
-        unsigned row, col;
+        unsigned row = 0, col = 0;
         std::vector<uint32_t> internal_values;
 
         Chain() = default;

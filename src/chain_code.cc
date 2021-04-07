@@ -299,8 +299,18 @@ void SortChains(ChainCode& chcode, vector<cv::Vec4i>& hierarchy) {
     auto comp = [chains = chcode.chains](const int a, const int b) {
         if (chains[a].row != chains[b].row)
             return chains[a].row < chains[b].row;
-        else
+        else if (chains[a].col != chains[b].col)
             return chains[a].col < chains[b].col;
+        else if (chains[a].value_count != chains[b].value_count)
+            return chains[a].value_count < chains[b].value_count;
+        else {
+            for (size_t i = 0; i < chains[a].internal_values.size(); ++i) {
+                if (chains[a].internal_values[i] != chains[b].internal_values[i]) {
+                    return chains[a].internal_values[i] < chains[b].internal_values[i];
+                }
+            }
+        }
+        throw std::runtime_error("Unreachable code!");
     };
 
     sort(inv_mapping.begin(), inv_mapping.end(), comp);
