@@ -90,8 +90,8 @@ bool GetBinaryImage(const string& filename, Mat1b& binary_mat)
     if (image.empty()) {
         return false;
     }
-    // Adjust the threshold to force the image be {0,255}
-    threshold(image, binary_mat, 100, 255, THRESH_BINARY);
+    // Adjust the threshold to force the image be {0,1}
+    threshold(image, binary_mat, 0, 1, THRESH_BINARY);
    
     return true;
 }

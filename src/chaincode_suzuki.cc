@@ -43,6 +43,8 @@ void Suzuki::PerformChainCodeWithSteps() {
 
 
 void SuzukiTopology::PerformChainCode() {
+    with_hierarchy_ = true;
+
     vector<vector<Point>> cv_contours;
     findContours(img_, cv_contours, hierarchy_, RETR_TREE, CHAIN_APPROX_NONE);
     chain_code_ = ChainCode(cv_contours, true);
