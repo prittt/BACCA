@@ -21,9 +21,9 @@ set(BACCA_INPUT_DATASET_PATH "${CMAKE_INSTALL_PREFIX}/input" CACHE PATH "'input'
 set(BACCA_OUTPUT_RESULTS_PATH "${CMAKE_INSTALL_PREFIX}/output" CACHE PATH "'output' results path") 
 set(BACCA_IS_TRAVIS_CI OFF CACHE INTERNAL "This variable is used to handle travis-ci parameters, do not change its value")
 
-#Set C++11 standard
+#Set C++14 standard
 set(CMAKE_CXX_STANDARD_REQUIRED YES) # Force the following command to generate an error when it fails
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS NO)
 
 if(MSVC)

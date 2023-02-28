@@ -329,7 +329,7 @@ void SortChains(ChainCode& chcode, vector<cv::Vec4i>& hierarchy) {
     // Reorder hierarchy
     vector<cv::Vec4i> sorted_hierarchy(n, {-1, -1, -1, -1});
 
-    // Fathers first
+    // Parents first
     for (int i = 0; i < n; ++i) {
         int old_parent = hierarchy[inv_mapping[i]][3];
         if (old_parent != -1) {
