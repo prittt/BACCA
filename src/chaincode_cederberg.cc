@@ -55,6 +55,8 @@ using namespace cv;
 #define MAX_OUTER       2u
 #define MAX_INNER       1u
 
+namespace {
+
 struct TemplateCheck {
 
     using Template = const int8_t[9];
@@ -125,6 +127,9 @@ struct TemplateCheck {
     }
 
 };
+
+}
+
 TemplateCheck::Template TemplateCheck::templates[] = {
 
         // Chain links

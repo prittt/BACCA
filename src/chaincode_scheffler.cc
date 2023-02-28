@@ -54,6 +54,7 @@ using namespace cv;
 #define MAX_I       1u
 
 
+namespace {
 
 struct TemplateCheck {
 
@@ -125,6 +126,8 @@ struct TemplateCheck {
     }
 
 };
+
+}
 
 TemplateCheck::Template TemplateCheck::templates[] = {
 
