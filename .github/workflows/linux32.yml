@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     container:
         image: docker://aimagelab/yacclab-test:linux32
     steps:
