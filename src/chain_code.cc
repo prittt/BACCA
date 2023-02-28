@@ -167,7 +167,7 @@ void UpdateHierarchyRec(vector<cv::Vec4i>& hierarchy,
     for (auto& it = node_vec.cbegin(); it != node_vec.cend(); ++it) {
         auto node = it->get();
 
-        RCNode* father = node->father;
+        RCNode* parent = node->parent;
 
         int chain_pos = used_elems[node->elem_index];
 
@@ -177,11 +177,11 @@ void UpdateHierarchyRec(vector<cv::Vec4i>& hierarchy,
         // prev sibling
         hierarchy[chain_pos][1] = (it == node_vec.cbegin()) ? -1 : used_elems[(it - 1)->get()->elem_index];
 
-        // first son
+        // first child
         hierarchy[chain_pos][2] = node->children.size() > 0 ? used_elems[node->children[0]->elem_index] : -1;
 
-        // fahter
-        hierarchy[chain_pos][3] = (father->elem_index == -1) ? -1 : used_elems[father->elem_index];
+        // parent
+        hierarchy[chain_pos][3] = (parent->elem_index == -1) ? -1 : used_elems[parent->elem_index];
 
         if (node->children.size() > 0) {
             UpdateHierarchyRec(hierarchy, rccode, node->children, used_elems);
@@ -224,53 +224,53 @@ bool CheckHierarchy(const std::vector<cv::Vec4i>& hierarchy) {
 
     int n = static_cast<int>(hierarchy.size());
 
-    // Check that a father can reach only his sons
+    // Check that a parent can reach only his children
     // Check that next and prev siblings are coherent
-    // Count sons for each father
-    vector<int> son_count(hierarchy.size(), 0);
+    // Count children for each parent
+    vector<int> child_count(hierarchy.size(), 0);
 
     for (int i = 0; i < n; ++i) {
 
-        int first_son = hierarchy[i][2];
+        int first_child = hierarchy[i][2];
 
-        if (first_son != -1) {
+        if (first_child != -1) {
 
-            ++son_count[i];
+            ++child_count[i];
 
-            if (hierarchy[first_son][1] != -1)
+            if (hierarchy[first_child][1] != -1)
                 return false;
 
-            if (hierarchy[first_son][3] != i)
+            if (hierarchy[first_child][3] != i)
                 return false;
 
-            int current_son = first_son;
-            int next_son = hierarchy[current_son][0];
-            while (next_son != -1) {
+            int current_child = first_child;
+            int next_child = hierarchy[current_child][0];
+            while (next_child != -1) {
 
-                ++son_count[i];
+                ++child_count[i];
 
-                if (hierarchy[next_son][1] != current_son)
+                if (hierarchy[next_child][1] != current_child)
                     return false;
 
-                if (hierarchy[next_son][3] != i)
+                if (hierarchy[next_child][3] != i)
                     return false;
 
-                current_son = next_son;
-                next_son = hierarchy[next_son][0];
+                current_child = next_child;
+                next_child = hierarchy[next_child][0];
 
             }
         }
     }
 
-    // Check that all sons were counted
+    // Check that all children were counted
     for (int i = 0; i < hierarchy.size(); ++i) {
-        int father = hierarchy[i][3];
-        if (father != -1) {
-            --son_count[father];
+        int parent = hierarchy[i][3];
+        if (parent != -1) {
+            --child_count[parent];
         }
     }    
     auto predicate = [](int v) -> bool { return v == 0; };
-    return all_of(son_count.cbegin(), son_count.cend(), predicate);
+    return all_of(child_count.cbegin(), child_count.cend(), predicate);
 
     // return true;
 }
@@ -331,28 +331,28 @@ void SortChains(ChainCode& chcode, vector<cv::Vec4i>& hierarchy) {
 
     // Fathers first
     for (int i = 0; i < n; ++i) {
-        int old_father = hierarchy[inv_mapping[i]][3];
-        if (old_father != -1) {
-            sorted_hierarchy[i][3] = mapping[old_father];
+        int old_parent = hierarchy[inv_mapping[i]][3];
+        if (old_parent != -1) {
+            sorted_hierarchy[i][3] = mapping[old_parent];
         }
     }
 
-    // Now that fathers are correct, the rest of the hierarchy data can
-    // be reconstructed from the fathers. It is not useful for the
+    // Now that parents are correct, the rest of the hierarchy data can
+    // be reconstructed from the parents. It is not useful for the
     // comparison, but it is calculated for completeness
-    vector<int> last_sons(n, -1);
+    vector<int> last_children(n, -1);
     for (int i = 0; i < n; ++i) {
-        int father = sorted_hierarchy[i][3];
-        if (father != -1) {
-            int last_sibling = last_sons[father];
+        int parent = sorted_hierarchy[i][3];
+        if (parent != -1) {
+            int last_sibling = last_children[parent];
             if (last_sibling == -1) {
-                sorted_hierarchy[father][2] = i;
+                sorted_hierarchy[parent][2] = i;
             }
             else {
                 sorted_hierarchy[last_sibling][0] = i;
                 sorted_hierarchy[i][1] = last_sibling;                
             }
-            last_sons[father] = i;
+            last_children[parent] = i;
         }
     }
 

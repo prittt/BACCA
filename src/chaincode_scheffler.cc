@@ -203,11 +203,11 @@ void MergeNodes(RCNode* dst, RCNode* src, RCCode& rccode, bool different_status 
     }
 
     // Reparent children of src
-    RCNode* new_father = different_status ? dst->father : dst;
+    RCNode* new_parent = different_status ? dst->parent : dst;
     for (auto& child : src->children) {
-        child.get()->father = new_father;
+        child.get()->parent = new_parent;
     }
-    new_father->children.insert(new_father->children.end(),
+    new_parent->children.insert(new_parent->children.end(),
         make_move_iterator(src->children.begin()),
         make_move_iterator(src->children.end()));
 
@@ -215,7 +215,7 @@ void MergeNodes(RCNode* dst, RCNode* src, RCCode& rccode, bool different_status 
     // Nodes once again point to the top-left maxpoint in the contour.
     dst->elem_index = min(dst->elem_index, src->elem_index);
 
-    src->father->DeleteChild(src);
+    src->parent->DeleteChild(src);
 }
 
 /*
@@ -288,11 +288,11 @@ inline void ConnectChainsTopology(RCCode& rccode, vector<unsigned>& chains, unsi
     else {
         if (l->status == RCNode::Status::potO) {
             MergeNodes(y, x, rccode, true);
-            current_node = y->father;
+            current_node = y->parent;
         }
         else {
             MergeNodes(x, y, rccode, true);
-            current_node = x->father;
+            current_node = x->parent;
         }
     }
     if (current_node != nullptr) {
@@ -405,8 +405,8 @@ void AddLinkLeft(RCCode& rccode, vector<unsigned>& chains, unsigned int& pos, bo
         *object = node;
     }
     else if (node->status == RCNode::Status::potH) {
-        *hole = node->father->father;
-        *object = node->father;
+        *hole = node->parent->parent;
+        *object = node->parent;
     }
 
     pos++;

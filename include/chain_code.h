@@ -30,14 +30,14 @@ struct RCNode {
     enum class Status { O, H, potO, potH, none };
 
     int elem_index;
-    RCNode* father = nullptr;
+    RCNode* parent = nullptr;
     std::vector<std::unique_ptr<RCNode>> children;
     Status status = Status::none;
 
     RCNode(int elem_index_) : elem_index(elem_index_) {}
-    RCNode(int elem_index_, RCNode* father_) : elem_index(elem_index_), father(father_) {}
-    RCNode(int elem_index_, RCNode* father_, Status status_) :
-        elem_index(elem_index_), father(father_), status(status_) {}
+    RCNode(int elem_index_, RCNode* parent_) : elem_index(elem_index_), parent(parent_) {}
+    RCNode(int elem_index_, RCNode* parent_, Status status_) :
+        elem_index(elem_index_), parent(parent_), status(status_) {}
 
     RCNode* EmplaceChild(int elem_index_, Status status_) {
         children.push_back(std::move(std::make_unique<RCNode>(elem_index_, this, status_)));

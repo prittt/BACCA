@@ -101,7 +101,7 @@ static void myFindContours(Mat1b img_, vector<vector<Point>>& contours_, vector<
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     vector<bool> contours_outer;
-    vector<int> last_sons;
+    vector<int> last_children;
     int last_outermost = -1;
 
     int rows = img.rows;
@@ -145,37 +145,37 @@ static void myFindContours(Mat1b img_, vector<vector<Point>>& contours_, vector<
                     contour.emplace_back(c, r);
 
                     // Punto 2: gerarchia
-                    last_sons.push_back(-1);
+                    last_children.push_back(-1);
                     int cur = static_cast<int>(contours.size());
-                    int father = -1;
+                    int parent = -1;
                     int prev_sibling = -1;
                     int b_primo = LNBD - 2;
                     if (contours_outer.back()) {
                         if (b_primo >= 0 && contours_outer[b_primo]) {
-                            father = hierarchy[b_primo][3];
+                            parent = hierarchy[b_primo][3];
                         }
                         else {
-                            father = b_primo;
+                            parent = b_primo;
                         }
                     }
                     else {
                         if (b_primo == -1 || contours_outer[b_primo]) {
-                            father = b_primo;
+                            parent = b_primo;
                         }
                         else {
-                            father = hierarchy[b_primo][3];
+                            parent = hierarchy[b_primo][3];
                         }
                     }
-                    if (father >= 0) {
-                        prev_sibling = last_sons[father];
+                    if (parent >= 0) {
+                        prev_sibling = last_children[parent];
                         if (prev_sibling < 0) {
-                            hierarchy[father][2] = cur;
+                            hierarchy[parent][2] = cur;
                         }
                         else {
                             hierarchy[prev_sibling][0] = cur;
                         }
 
-                        last_sons[father] = cur;
+                        last_children[parent] = cur;
                     }
                     else {
                         if (last_outermost >= 0) {
@@ -184,7 +184,7 @@ static void myFindContours(Mat1b img_, vector<vector<Point>>& contours_, vector<
                         }
                         last_outermost = cur;
                     }
-                    hierarchy.emplace_back(-1, prev_sibling, -1, father);
+                    hierarchy.emplace_back(-1, prev_sibling, -1, parent);
 
                     // 3.1
                     bool found = RoundNextForeground(img, p, p2, Dir::CLOCKWISE, p1);
