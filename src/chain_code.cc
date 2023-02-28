@@ -164,7 +164,7 @@ void UpdateHierarchyRec(vector<cv::Vec4i>& hierarchy,
     const RCCode& rccode, const vector<unique_ptr<RCNode>>& node_vec,
     const vector<int>& used_elems) {
 
-    for (auto& it = node_vec.cbegin(); it != node_vec.cend(); ++it) {
+    for (auto it = node_vec.cbegin(); it != node_vec.cend(); ++it) {
         auto node = it->get();
 
         RCNode* parent = node->parent;
