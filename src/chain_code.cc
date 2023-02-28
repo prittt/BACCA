@@ -88,9 +88,10 @@ ChainCode::ChainCode(const std::vector<std::vector<cv::Point>>& contours, bool c
 }
 
 bool ChainCode::Chain::operator==(const Chain& rhs) const {
-    return row == rhs.row &&
-        col == rhs.col &&
-        internal_values == rhs.internal_values;
+    const bool same_row = row == rhs.row;
+    const bool same_col = col == rhs.col;
+    const bool same_internal_values = internal_values == rhs.internal_values;
+    return same_row && same_col && same_internal_values;
 }
 
 bool ChainCode::Chain::operator<(const Chain& rhs) const {
@@ -276,15 +277,7 @@ bool CheckHierarchy(const std::vector<cv::Vec4i>& hierarchy) {
 }
 
 void SortChains(ChainCode& chcode) {
-
-    auto comp = [](const ChainCode::Chain& a, const ChainCode::Chain& b) {
-        if (a.row != b.row)
-            return a.row < b.row;
-        else
-            return a.col < b.col;
-    };
-    sort(chcode.chains.begin(), chcode.chains.end(), comp);
-
+    sort(chcode.chains.begin(), chcode.chains.end());
 }
 
 void SortChains(ChainCode& chcode, vector<cv::Vec4i>& hierarchy) {

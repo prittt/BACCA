@@ -127,8 +127,6 @@ struct TemplateCheck {
 
 };
 
-}
-
 TemplateCheck::Template TemplateCheck::templates[] = {
 
     // Chain links
@@ -161,31 +159,49 @@ TemplateCheck::Template TemplateCheck::templates[] = {
     {-1,  1,  0,
       0,  0,  0},
 
-    // Min Points (inner)
-    {0,  0,  1,
-     1,  1, -1},
+      // Min Points (inner)
+      {0,  0,  1,
+       1,  1, -1},
 
-    { 1,  0,  1,
-     -1,  1, -1},
+      { 1,  0,  1,
+       -1,  1, -1},
 
-    // Max Points (outer)
-    {0,  0,  0,
-     0,  1, -1},
+       // Max Points (outer)
+       {0,  0,  0,
+        0,  1, -1},
 
-    // Max Points (inner)
-    {-1, 1, 1,
-      1, 0, 0 },
+        // Max Points (inner)
+        {-1, 1, 1,
+          1, 0, 0 },
 
-    {-1, 1, -1,
-      1, 0,  1 },
+        {-1, 1, -1,
+          1, 0,  1 },
 
 };
 
+bool FillLookupTable(string filename = "scheffler_lut.inc", string table_name = "table") {
 
+    ofstream os(filename);
+    if (!os) {
+        return false;
+    }
+
+    for (uint8_t conditions = 0; conditions < 64; conditions++) {
+
+        const uint16_t state = TemplateCheck::CondToState(conditions);
+
+        os << state << ", ";
+
+    }
+
+    return true;
+}
+
+}
 
 void MergeNodes(RCNode* dst, RCNode* src, RCCode& rccode, bool different_status = false) {
     unsigned int index = src->elem_index;
-    
+
     // Update node pointer in src max point
     rccode[index].node = dst;
 
@@ -266,7 +282,7 @@ inline void ConnectChainsTopology(RCCode& rccode, vector<unsigned>& chains, unsi
     // Remove chains from vector
     chains.erase(chains.begin() + pos - 2, chains.begin() + pos);
 
-    RCNode *x, *y;
+    RCNode* x, * y;
     if (outer) {
         y = l;
         x = r;
@@ -311,7 +327,7 @@ inline void ConnectChainsTopology(RCCode& rccode, vector<unsigned>& chains, unsi
     }
 }
 
-unsigned int ProcessPixelNaive(int r, int c, uint16_t state, RCCode& rccode, 
+unsigned int ProcessPixelNaive(int r, int c, uint16_t state, RCCode& rccode,
     vector<unsigned>& chains, unsigned int pos, bool& chain_is_left) {
 
     if (state & D0_L) {
@@ -393,7 +409,95 @@ unsigned int ProcessPixelNaive(int r, int c, uint16_t state, RCCode& rccode,
         chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
         pos += 2;
     }
-    
+
+    return pos;
+
+}
+
+template <uint16_t state>
+unsigned int ProcessPixel(int r, int c, RCCode& rccode,
+    vector<unsigned>& chains, unsigned int pos, bool& chain_is_left) {
+
+    if (state & D0_L) {
+        if (chain_is_left) {
+            rccode[chains[pos]].left.push_back(0);
+        }
+        else {
+            rccode[chains[pos - 1]].left.push_back(0);
+        }
+    }
+
+    if (state & MIN_O) {
+        ConnectChains<true>(rccode, chains, pos + 2);
+    }
+
+    if (state & MAX_I) {
+        rccode.AddElem(r - 1, c);
+        if (chain_is_left) {
+            chains.insert(chains.begin() + pos - 1, 2, static_cast<int>(rccode.Size()) - 1);
+            rccode[chains[pos - 1]].right.push_back(rccode[chains[pos + 1]].right.pop_back());
+        }
+        else {
+            chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
+        }
+    }
+
+    if (state & D0_R) {
+        if (chain_is_left) {
+            rccode[chains[pos - 1]].right.push_back(0);
+        }
+        else {
+            rccode[chains[pos - 2]].right.push_back(0);
+        }
+    }
+
+    if (state & D1_L) {
+        rccode[chains[pos]].left.push_back(1);
+        pos++;
+        chain_is_left = !chain_is_left;
+    }
+    if (state & D1_R) {
+        rccode[chains[pos]].right.push_back(1);
+        pos++;
+        chain_is_left = !chain_is_left;
+    }
+    if (state & D2_L) {
+        rccode[chains[pos]].left.push_back(2);
+        pos++;
+        chain_is_left = !chain_is_left;
+    }
+    if (state & D2_R) {
+        rccode[chains[pos]].right.push_back(2);
+        pos++;
+        chain_is_left = !chain_is_left;
+    }
+    if (state & D3_L) {
+        rccode[chains[pos]].left.push_back(3);
+        pos++;
+        chain_is_left = !chain_is_left;
+    }
+    if (state & D3_R) {
+        rccode[chains[pos]].right.push_back(3);
+        pos++;
+        chain_is_left = !chain_is_left;
+    }
+
+    if (state & MIN_I) {
+        if (chain_is_left) {
+            ConnectChains<false>(rccode, chains, pos - 1);
+        }
+        else {
+            ConnectChains<false>(rccode, chains, pos);
+        }
+        pos -= 2;
+    }
+
+    if (state & MAX_O) {
+        rccode.AddElem(r, c);
+        chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
+        pos += 2;
+    }
+
     return pos;
 
 }
@@ -503,7 +607,7 @@ unsigned int ProcessPixelNaiveTopology(int r, int c, uint16_t state, RCCode& rcc
         chains.insert(chains.begin() + pos, 2, static_cast<int>(rccode.Size()) - 1);
         pos += 2;
     }
-    
+
     return pos;
 
 }
@@ -551,12 +655,208 @@ void Scheffler::PerformChainCode() {
 }
 
 
+void Scheffler_LUT::PerformChainCode() {
+
+    //static const constexpr std::array<uint16_t, 64> StateLUT = {
+    //    0, 0, 8, 2056, 0, 0, 0, 2048, 0, 0, 0, 0, 0, 0, 1, 1,
+    //    2, 768, 192, 576, 48, 820, 144, 528, 1024, 256, 64, 64, 1076, 308, 16, 16,
+    //    0, 0, 0, 2048, 0, 0, 0, 2048, 0, 0, 1, 1, 0, 0, 1, 1,
+    //    2, 768, 128, 512, 32, 804, 128, 512, 1024, 256, 0, 0, 1060, 292, 0, 0 };
+
+#include "scheffler_lut.inc"
+
+    RCCode rccode;
+
+    vector<unsigned> chains;
+
+    int h = img_.rows;
+    int w = img_.cols;
+
+    const unsigned char* previous_row_ptr = nullptr;
+    const unsigned char* row_ptr = img_.ptr(0);
+    bool chain_is_left = true;
+
+    // Build Raster Scan Chain Code
+    for (int r = 0; r < h + 1; r++) {
+        unsigned int pos = 0;
+        chain_is_left = true;   // TODO verificare
+
+        for (int c = 0; c < w; c++) {
+
+            uint8_t condition = 0;
+
+            if (r > 0 && c > 0 && previous_row_ptr[c - 1])                     condition |= PIXEL_A;
+            if (r > 0 && previous_row_ptr[c])                                  condition |= PIXEL_B;
+            if (r > 0 && c + 1 < w && previous_row_ptr[c + 1])                 condition |= PIXEL_C;
+            if (r < h && c > 0 && row_ptr[c - 1])                              condition |= PIXEL_D;
+            if (r < h && row_ptr[c])                                           condition |= PIXEL_E;
+            if (r < h && c + 1 < w && row_ptr[c + 1])                          condition |= PIXEL_F;
+
+            //const uint16_t state = StateLUT[condition];
+
+            auto processPixelFunction = LUT[condition];
+            pos = processPixelFunction(r, c, rccode, chains, pos, chain_is_left);
+        }
+
+        previous_row_ptr = row_ptr;
+        row_ptr += img_.step[0];
+    }
+
+    RCCodeToChainCode(rccode, chain_code_);
+}
+
+
+void Scheffler_LUT_PRED::PerformChainCode() {
+
+#include "scheffler_lut.inc"
+
+    RCCode rccode;
+
+    vector<unsigned> chains;
+
+    int h = img_.rows;
+    int w = img_.cols;
+
+    const unsigned char* previous_row_ptr = nullptr;
+    const unsigned char* row_ptr = img_.ptr(0);
+    bool chain_is_left = true;
+
+    if (h == 1 || w == 1) {
+        for (int r = 0; r < h + 1; r++) {
+            unsigned int pos = 0;
+            chain_is_left = true;   // TODO verificare
+
+            for (int c = 0; c < w; c++) {
+
+                uint8_t condition = 0;
+
+                if (r > 0 && c > 0 && previous_row_ptr[c - 1])                     condition |= PIXEL_A;
+                if (r > 0 && previous_row_ptr[c])                                  condition |= PIXEL_B;
+                if (r > 0 && c + 1 < w && previous_row_ptr[c + 1])                 condition |= PIXEL_C;
+                if (r < h && c > 0 && row_ptr[c - 1])                              condition |= PIXEL_D;
+                if (r < h && row_ptr[c])                                           condition |= PIXEL_E;
+                if (r < h && c + 1 < w && row_ptr[c + 1])                          condition |= PIXEL_F;
+
+                //const uint16_t state = StateLUT[condition];
+
+                auto processPixelFunction = LUT[condition];
+                pos = processPixelFunction(r, c, rccode, chains, pos, chain_is_left);
+            }
+
+            previous_row_ptr = row_ptr;
+            row_ptr += img_.step[0];
+        }
+
+        RCCodeToChainCode(rccode, chain_code_);
+        return;
+    }
+
+    // Build Raster Scan Chain Code
+
+    // First Line
+    {
+        unsigned int pos = 0;
+        chain_is_left = true;   // TODO verificare
+        uint8_t condition = 0;
+
+        if (row_ptr[0])                  condition |= PIXEL_E;
+        if (row_ptr[1])                  condition |= PIXEL_F;
+
+        auto processPixelFunction = LUT[condition];
+        pos = processPixelFunction(0, 0, rccode, chains, pos, chain_is_left);
+
+        for (int c = 1; c < w - 1; c++) {
+
+            condition = condition >> 1 & ~7;
+
+            if (row_ptr[c + 1])                          condition |= PIXEL_F;
+
+            processPixelFunction = LUT[condition];
+            pos = processPixelFunction(0, c, rccode, chains, pos, chain_is_left);
+
+        }
+
+        condition = condition >> 1 & ~7;
+        processPixelFunction = LUT[condition];
+        pos = processPixelFunction(0, w - 1, rccode, chains, pos, chain_is_left);
+
+        previous_row_ptr = row_ptr;
+        row_ptr += img_.step[0];
+    }
+
+    // Middle Lines
+    for (int r = 1; r < h; r++) {
+        unsigned int pos = 0;
+        chain_is_left = true;   // TODO verificare
+
+        uint8_t condition = 0;
+
+        if (previous_row_ptr[0])            condition |= PIXEL_B;
+        if (previous_row_ptr[1])            condition |= PIXEL_C;
+        if (row_ptr[0])                     condition |= PIXEL_E;
+        if (row_ptr[1])                     condition |= PIXEL_F;
+
+        auto processPixelFunction = LUT[condition];
+        pos = processPixelFunction(r, 0, rccode, chains, pos, chain_is_left);
+
+        for (int c = 1; c < w - 1; c++) {
+
+            condition = condition >> 1 & ~(PIXEL_C | PIXEL_F);
+
+            if (previous_row_ptr[c + 1])                condition |= PIXEL_C;
+            if (row_ptr[c + 1])                         condition |= PIXEL_F;
+
+            processPixelFunction = LUT[condition];
+            pos = processPixelFunction(r, c, rccode, chains, pos, chain_is_left);
+
+        }
+
+        condition = condition >> 1 & ~(PIXEL_C | PIXEL_F);
+        processPixelFunction = LUT[condition];
+        pos = processPixelFunction(r, w - 1, rccode, chains, pos, chain_is_left);
+
+        previous_row_ptr = row_ptr;
+        row_ptr += img_.step[0];
+    }
+
+    // Last line
+    {
+        unsigned int pos = 0;
+        chain_is_left = true;   // TODO verificare
+        uint8_t condition = 0;
+
+        if (previous_row_ptr[0])            condition |= PIXEL_B;
+        if (previous_row_ptr[1])            condition |= PIXEL_C;
+
+        auto processPixelFunction = LUT[condition];
+        pos = processPixelFunction(0, h, rccode, chains, pos, chain_is_left);
+
+        for (int c = 1; c < w - 1; c++) {
+
+            condition = condition >> 1;
+
+            if (previous_row_ptr[c + 1])            condition |= PIXEL_C;
+
+            processPixelFunction = LUT[condition];
+            pos = processPixelFunction(h, c, rccode, chains, pos, chain_is_left);
+
+        }
+
+        condition = condition >> 1;
+        processPixelFunction = LUT[condition];
+        pos = processPixelFunction(h, w - 1, rccode, chains, pos, chain_is_left);
+    }
+
+    RCCodeToChainCode(rccode, chain_code_);
+}
+
+
 void SchefflerTopology::PerformChainCode() {
 
     with_hierarchy_ = true;
 
     RCCode rccode(true);
-    
+
     vector<unsigned> chains;
 
     int h = img_.rows;
@@ -586,10 +886,6 @@ void SchefflerTopology::PerformChainCode() {
             if (r < h && c + 1 < w && row_ptr[c + 1])                          condition |= PIXEL_F;
 
             uint16_t state = TemplateCheck::CondToState(condition);
-
-            if (r == 238 && c == 293) {
-                int x = 0;
-            }
 
             pos = ProcessPixelNaiveTopology(r, c, state, rccode, chains, pos, chain_is_left, &object, &hole);
         }
@@ -626,4 +922,7 @@ void SchefflerTopology::PerformChainCode() {
 
 
 REGISTER_CHAINCODEALG(Scheffler)
+REGISTER_CHAINCODEALG(Scheffler_LUT)
+REGISTER_CHAINCODEALG(Scheffler_LUT_PRED)
 REGISTER_CHAINCODEALG(SchefflerTopology)
+

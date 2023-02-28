@@ -21,6 +21,26 @@ public:
     }
 };
 
+class Scheffler_LUT : public ChainCodeAlg {
+
+public:
+    virtual void PerformChainCode();
+
+    virtual void FreeChainCodeData() {
+        ChainCodeAlg::FreeChainCodeData();
+    }
+};
+
+class Scheffler_LUT_PRED : public ChainCodeAlg {
+
+public:
+    virtual void PerformChainCode();
+
+    virtual void FreeChainCodeData() {
+        ChainCodeAlg::FreeChainCodeData();
+    }
+};
+
 
 
 class SchefflerTopology : public ChainCodeAlg {
