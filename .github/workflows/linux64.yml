@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: configure
-      run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-m64" -DCMAKE_C_FLAGS="-m64" -DBACCA_IS_TRAVIS_CI=ON -DBACCA_DOWNLOAD_DATASET=OFF -DBACCA_INPUT_DATASET_PATH=/builds/input ..
+      run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-m64" -DCMAKE_C_FLAGS="-m64" -DBACCA_IS_TRAVIS_CI=ON -DBACCA_DOWNLOAD_DATASET=OFF -DBACCA_INPUT_DATASET_PATH=/builds ..
     - name: build
       run: cmake --build build --config Release
     - name: run
