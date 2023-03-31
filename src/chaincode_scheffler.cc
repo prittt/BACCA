@@ -197,6 +197,40 @@ bool FillLookupTable(string filename = "scheffler_lut.inc", string table_name = 
     return true;
 }
 
+
+void WriteActionAndRules() {
+    ofstream os("action_rules.yaml");
+
+    std::set<uint16_t> states;
+    std::array<uint16_t, 64> conditions_to_states;
+
+    for (uint8_t conditions = 0; conditions < 64; conditions++) {
+
+        const uint16_t state = TemplateCheck::CondToState(conditions);
+        states.insert(state);
+        conditions_to_states[conditions] = state;
+
+    }
+
+    std::vector<uint16_t> sorted_states(states.begin(), states.end());
+    os << "actions: [\n";
+    for (auto state : sorted_states) {
+        os << "    " << state << ",\n";
+    }
+    os << "]\n";
+
+    os << "rules: [\n";
+    for (uint8_t conditions = 0; conditions < 64; conditions++) {
+
+        auto state = conditions_to_states[conditions];
+        auto state_iterator = std::lower_bound(sorted_states.begin(), sorted_states.end(), state);
+        ptrdiff_t state_pos = state_iterator - sorted_states.begin();
+        os << "    [" << state_pos + 1 << "],\n";
+
+    }
+    os << "]\n";
+}
+
 }
 
 void MergeNodes(RCNode* dst, RCNode* src, RCCode& rccode, bool different_status = false) {
@@ -899,6 +933,127 @@ void SchefflerTopology::PerformChainCode() {
 }
 
 
+void Scheffler_Spaghetti::PerformChainCode() {
+
+    RCCode rccode;
+
+    vector<unsigned> chains;
+
+    int h = img_.rows;
+    int w = img_.cols;
+
+    const unsigned char* previous_row_ptr = nullptr;
+    const unsigned char* row_ptr = img_.ptr(0);
+    bool chain_is_left = true;
+
+#define CONDITION_A     (previous_row_ptr[c - 1])                     
+#define CONDITION_B     (previous_row_ptr[c])                                  
+#define CONDITION_C     (previous_row_ptr[c + 1])         
+#define CONDITION_D     (row_ptr[c - 1])                                       
+#define CONDITION_X     (row_ptr[c])                                                    
+#define CONDITION_E     (row_ptr[c + 1])                           
+
+#define ACTION_1	pos = ProcessPixel<0	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_2	pos = ProcessPixel<1	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_3	pos = ProcessPixel<2	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_4	pos = ProcessPixel<8	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_5	pos = ProcessPixel<16	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_6	pos = ProcessPixel<32	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_7	pos = ProcessPixel<48	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_8	pos = ProcessPixel<64	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_9	pos = ProcessPixel<128	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_10	pos = ProcessPixel<144	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_11	pos = ProcessPixel<192	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_12	pos = ProcessPixel<256	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_13	pos = ProcessPixel<292	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_14	pos = ProcessPixel<308	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_15	pos = ProcessPixel<512	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_16	pos = ProcessPixel<528	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_17	pos = ProcessPixel<576	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_18	pos = ProcessPixel<768	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_19	pos = ProcessPixel<804	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_20	pos = ProcessPixel<820	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_21	pos = ProcessPixel<1024	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_22	pos = ProcessPixel<1060	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_23	pos = ProcessPixel<1076	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_24	pos = ProcessPixel<2048	>(r, c, rccode, chains, pos, chain_is_left);
+#define ACTION_25	pos = ProcessPixel<2056	>(r, c, rccode, chains, pos, chain_is_left);
+
+    // First line
+    int r = 0;
+    int c = -1;
+    unsigned int pos = 0;
+
+    c = -1;
+    goto fl_tree_0;
+
+#include "Scheffler_Spaghetti_first_line_forest_code.inc.h"
+
+    if (h > 1) {
+        // Build Raster Scan Chain Code
+        for (r = 1; r < h; r++) {
+            chain_is_left = true;   // TODO verify this
+
+            previous_row_ptr = row_ptr;
+            row_ptr += img_.step[0];
+            pos = 0;
+
+            c = -1;
+            goto cl_tree_0;
+
+#include "Scheffler_Spaghetti_center_line_forest_code.inc.h"
+
+        }
+
+        chain_is_left = true;   // TODO verify this
+        previous_row_ptr = row_ptr;
+        row_ptr = nullptr;
+        pos = 0;
+
+        c = -1;
+        goto bl_tree_0;
+
+#include "Scheffler_Spaghetti_below_line_forest_code.inc.h"
+
+    }
+
+#undef ACTION_1 
+#undef ACTION_2 
+#undef ACTION_3 
+#undef ACTION_4 
+#undef ACTION_5 
+#undef ACTION_6 
+#undef ACTION_7 
+#undef ACTION_8 
+#undef ACTION_9 
+#undef ACTION_10
+#undef ACTION_11
+#undef ACTION_12
+#undef ACTION_13
+#undef ACTION_14
+#undef ACTION_15
+#undef ACTION_16
+#undef ACTION_17
+#undef ACTION_18
+#undef ACTION_19
+#undef ACTION_20
+#undef ACTION_21
+#undef ACTION_22
+#undef ACTION_23
+#undef ACTION_24
+#undef ACTION_25
+
+#undef CONDITION_A
+#undef CONDITION_B
+#undef CONDITION_C
+#undef CONDITION_D
+#undef CONDITION_X
+#undef CONDITION_E
+
+    RCCodeToChainCode(rccode, chain_code_);
+}
+
+
 
 #undef D0_L
 #undef D0_R
@@ -924,5 +1079,5 @@ void SchefflerTopology::PerformChainCode() {
 REGISTER_CHAINCODEALG(Scheffler)
 REGISTER_CHAINCODEALG(Scheffler_LUT)
 REGISTER_CHAINCODEALG(Scheffler_LUT_PRED)
+REGISTER_CHAINCODEALG(Scheffler_Spaghetti)
 REGISTER_CHAINCODEALG(SchefflerTopology)
-
