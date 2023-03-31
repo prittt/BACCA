@@ -44,6 +44,12 @@ algorithms:
   - Cederberg_Tree                  , Cederberg_Tree        ; Suzuki
   - Cederberg_Spaghetti             , Cederberg_Spaghetti   ; Suzuki
   - Cederberg_Spaghetti_FREQ_All    , Cederberg_SpaghettiF  ; Suzuki
+  - Scheffler                       , Scheffler             ; Suzuki
+  - Scheffler_LUT                   , Scheffler_LUT         ; Suzuki
+  - Scheffler_LUT_PRED              , Scheffler_LUT_PRED    ; Suzuki
+  - Scheffler_Spaghetti             , Scheffler_Spaghetti   ; Suzuki
+  - SuzukiTopology                  , SuzukiTopology        ; SuzukiTopology
+  - SchefflerTopology               , SchefflerTopology     ; SuzukiTopology
 
 # -------------------------------------------------------------------------------------
 # Datasets to use for each test
