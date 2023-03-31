@@ -14,9 +14,9 @@
 class Scheffler : public ChainCodeAlg {
 
 public:
-    virtual void PerformChainCode();
+    virtual void PerformChainCode() override;
 
-    virtual void FreeChainCodeData() {
+    virtual void FreeChainCodeData() override {
         ChainCodeAlg::FreeChainCodeData();
     }
 };
@@ -24,9 +24,9 @@ public:
 class Scheffler_LUT : public ChainCodeAlg {
 
 public:
-    virtual void PerformChainCode();
+    virtual void PerformChainCode() override;
 
-    virtual void FreeChainCodeData() {
+    virtual void FreeChainCodeData() override {
         ChainCodeAlg::FreeChainCodeData();
     }
 };
@@ -34,9 +34,9 @@ public:
 class Scheffler_LUT_PRED : public ChainCodeAlg {
 
 public:
-    virtual void PerformChainCode();
+    virtual void PerformChainCode() override;
 
-    virtual void FreeChainCodeData() {
+    virtual void FreeChainCodeData() override {
         ChainCodeAlg::FreeChainCodeData();
     }
 };
@@ -44,9 +44,9 @@ public:
 class Scheffler_Spaghetti : public ChainCodeAlg {
 
 public:
-    virtual void PerformChainCode();
+    virtual void PerformChainCode() override;
 
-    virtual void FreeChainCodeData() {
+    virtual void FreeChainCodeData() override {
         ChainCodeAlg::FreeChainCodeData();
     }
 };

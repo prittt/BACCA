@@ -7,12 +7,14 @@
 
 #include "bacca_tests.h"
 
+#include <cstdint>
+
 #include <algorithm>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <random>
 #include <set>
-#include <cstdint>
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -214,6 +216,9 @@ void BACCATests::AverageTest()
     // Initialize results container
     average_results_ = cv::Mat1d(static_cast<unsigned>(cfg_.average_datasets.size()), static_cast<unsigned>(cfg_.thin_average_algorithms.size()), std::numeric_limits<double>::max());
 
+    std::random_device rd;
+    std::mt19937 generator(rd());
+
     for (unsigned d = 0; d < cfg_.average_datasets.size(); ++d) { // For every dataset in the average list
 
         String dataset_name(cfg_.average_datasets[d]),
@@ -294,7 +299,7 @@ void BACCATests::AverageTest()
                     continue;
                 }
 
-                random_shuffle(begin(shuffled_thin_average_algorithms), end(shuffled_thin_average_algorithms));
+                shuffle(begin(shuffled_thin_average_algorithms), end(shuffled_thin_average_algorithms), generator);
 
                 // For all the Algorithms in the array
                 for (const auto& algo_name : shuffled_thin_average_algorithms) {
@@ -472,6 +477,9 @@ void BACCATests::AverageTestWithSteps()
         average_results_suffix = "_average.txt",
         average_results_rounded_suffix = "_average_rounded.txt";
 
+    std::random_device rd;
+    std::mt19937 generator(rd());
+
     for (unsigned d = 0; d < cfg_.average_ws_datasets.size(); ++d) { // For every dataset in the average list
 
         String dataset_name(cfg_.average_ws_datasets[d]),
@@ -549,7 +557,7 @@ void BACCATests::AverageTestWithSteps()
                     continue;
                 }
 
-                random_shuffle(begin(shuffled_thin_average_ws_algorithms), end(shuffled_thin_average_ws_algorithms));
+                shuffle(begin(shuffled_thin_average_ws_algorithms), end(shuffled_thin_average_ws_algorithms), generator);
 
                 // For all the Algorithms in the array
                 for (const auto& algo_name : shuffled_thin_average_ws_algorithms) {
