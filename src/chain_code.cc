@@ -288,8 +288,7 @@ void SortChains(ChainCode& chcode, vector<cv::Vec4i>& hierarchy) {
     vector<int> inv_mapping(n);
     iota(inv_mapping.begin(), inv_mapping.end(), 0);
 
-    // Che cos'è chains = chains? Copiato da stack overflow
-    auto comp = [chains = chcode.chains](const int a, const int b) {
+    auto comp = [&chains = chcode.chains](const int a, const int b) {
         if (chains[a].row != chains[b].row)
             return chains[a].row < chains[b].row;
         else if (chains[a].col != chains[b].col)
